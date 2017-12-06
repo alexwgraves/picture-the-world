@@ -35,13 +35,31 @@ class InstagramService {
     private final static String URL = "https://api.instagram.com/v1/";
 
     interface Service {
+        // get nearby recent media
+        @GET("media/{media-id}")
+        Call<GetMediaResponse> getMedia(@Path("media-id") String id, @Query("access_token") String token);
+
+        // get nearby recent media
+        @GET("media/search")
+        Call<GetNearbyMediaResponse> getNearbyMedia(@QueryMap Map<String, String> options);
+
         // get nearby locations
         @GET("locations/search")
         Call<GetLocationsResponse> getLocations(@QueryMap Map<String, String> options);
 
         // get a location's recent media
         @GET("locations/{location-id}/media/recent")
-        Call<GetLocationsResponse> getLocationMedia(@Path("location-id") String id, @QueryMap Map<String, String> options);
+        Call<GetLocationMediaResponse> getLocationMedia(@Path("location-id") String id, @Query("access_token") String token);
+    }
+
+    class GetMediaResponse {
+        @SerializedName("data")
+        MediaItem data;
+    }
+
+    class GetNearbyMediaResponse {
+        @SerializedName("data")
+        ArrayList<MediaItem> data;
     }
 
     class GetLocationsResponse {
