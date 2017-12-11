@@ -30,4 +30,10 @@
         android:layout_height="wrap_content"
         android:text="Find Place"/>
 
+    <Button
+        android:id="@+id/place_photos"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Get Place Photos"/>
+
 </LinearLayout>

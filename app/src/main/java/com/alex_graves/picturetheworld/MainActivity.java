@@ -3,6 +3,7 @@ package com.alex_graves.picturetheworld;
 import android.Manifest;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.graphics.Bitmap;
 import android.location.Location;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
@@ -18,12 +19,21 @@ import android.widget.Toast;
 
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.common.api.ResultCallback;
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationServices;
+import com.google.android.gms.location.places.GeoDataClient;
+import com.google.android.gms.location.places.Place;
+import com.google.android.gms.location.places.PlaceBuffer;
+import com.google.android.gms.location.places.PlaceBufferResponse;
 import com.google.android.gms.location.places.PlaceDetectionClient;
 import com.google.android.gms.location.places.PlaceLikelihood;
 import com.google.android.gms.location.places.PlaceLikelihoodBufferResponse;
+import com.google.android.gms.location.places.PlacePhotoMetadata;
+import com.google.android.gms.location.places.PlacePhotoMetadataBuffer;
+import com.google.android.gms.location.places.PlacePhotoMetadataResponse;
+import com.google.android.gms.location.places.PlacePhotoResponse;
 import com.google.android.gms.location.places.Places;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnSuccessListener;
@@ -49,17 +59,21 @@ public class MainActivity extends AppCompatActivity implements
     private static final int LOCATION_PERMISSION = 3;
 
     private GoogleApiClient googleApiClient;
+    private GeoDataClient geoDataClient;
     private PlaceDetectionClient placeClient;
     private FusedLocationProviderClient locationClient;
 
+    private ArrayList<PlaceListItem> items = new ArrayList<>();
+    private ArrayList<Bitmap> placeImages = new ArrayList<>();
+
     @BindView(R.id.connect)
     Button connect;
-
     @BindView(R.id.find_location)
     Button findLocation;
-
     @BindView(R.id.find_place)
     Button findPlace;
+    @BindView(R.id.place_photos)
+    Button placePhotos;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -74,6 +88,7 @@ public class MainActivity extends AppCompatActivity implements
                 .addApi(Places.PLACE_DETECTION_API)
                 .enableAutoManage(this, this)
                 .build();
+        geoDataClient = Places.getGeoDataClient(this, null);
         placeClient = Places.getPlaceDetectionClient(this, null);
         locationClient = LocationServices.getFusedLocationProviderClient(this);
 
@@ -118,6 +133,13 @@ public class MainActivity extends AppCompatActivity implements
             @Override
             public void onClick(View view) {
                 getUserLocation();
+            }
+        });
+
+        placePhotos.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                getPhotos();
             }
         });
     }
@@ -195,6 +217,8 @@ public class MainActivity extends AppCompatActivity implements
 
     void goToList() {
         Intent list = new Intent(MainActivity.this, ListActivity.class);
+        list.putParcelableArrayListExtra(getString(R.string.place_list_item), items);
+//        list.putParcelableArrayListExtra(getString(R.string.place_images), placeImages);
         startActivity(list);
     }
 
@@ -330,5 +354,51 @@ public class MainActivity extends AppCompatActivity implements
             ActivityCompat.requestPermissions(this,
                     new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, LOCATION_PERMISSION);
         }
+    }
+
+    private void getPhotos() {
+        final String placeId = "ChIJa147K9HX3IAR-lwiGIQv9i4";
+
+        // get place image
+        final Task<PlacePhotoMetadataResponse> photoMetadataResponse = geoDataClient.getPlacePhotos(placeId);
+        photoMetadataResponse.addOnCompleteListener(new OnCompleteListener<PlacePhotoMetadataResponse>() {
+            @Override
+            public void onComplete(@NonNull Task<PlacePhotoMetadataResponse> task) {
+                // Get the list of photos.
+                PlacePhotoMetadataResponse photos = task.getResult();
+                // Get the PlacePhotoMetadataBuffer (metadata for all of the photos).
+                PlacePhotoMetadataBuffer photoMetadataBuffer = photos.getPhotoMetadata();
+                // Get the first photo in the list.
+                PlacePhotoMetadata photoMetadata = photoMetadataBuffer.get(0);
+                // Get the attribution text.
+                CharSequence attribution = photoMetadata.getAttributions();
+                // Get a full-size bitmap for the photo.
+                Task<PlacePhotoResponse> photoResponse = geoDataClient.getPhoto(photoMetadata);
+                photoResponse.addOnCompleteListener(new OnCompleteListener<PlacePhotoResponse>() {
+                    @Override
+                    public void onComplete(@NonNull Task<PlacePhotoResponse> task) {
+                        PlacePhotoResponse photo = task.getResult();
+                        Bitmap bitmap = photo.getBitmap();
+                        placeImages.add(bitmap);
+                    }
+                });
+                photoMetadataBuffer.release();
+            }
+        });
+
+        Places.GeoDataApi.getPlaceById(googleApiClient, placeId).setResultCallback(new ResultCallback<PlaceBuffer>() {
+            @Override
+            public void onResult(PlaceBuffer places) {
+                if (places.getStatus().isSuccess() && places.getCount() > 0) {
+                    final Place place = places.get(0);
+                    Log.i("place", "Place found: " + place.getName());
+                    PlaceListItem item = new PlaceListItem(place.getName().toString(), place.getAddress().toString());
+                    items.add(item);
+                } else {
+                    Log.e("error", "Place not found");
+                }
+                places.release();
+            }
+        });
     }
 }

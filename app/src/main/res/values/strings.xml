@@ -5,4 +5,9 @@
     <string name="map_view">Map</string>
     <string name="list_view">List</string>
     <string name="home">Home</string>
+
+    <string name="place_name">Place name</string>
+    <string name="place_description">Place description</string>
+    <string name="place_list_item">place_list_item</string>
+    <string name="place_images">place_images</string>
 </resources>
