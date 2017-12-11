@@ -21,6 +21,7 @@ public class ListActivity extends AppCompatActivity {
 
     private ArrayList<PlaceListItem> items = new ArrayList<>();
     private ArrayList<Bitmap> placeImages = new ArrayList<>();
+    private ArrayList<String> placeCredits = new ArrayList<>();
     private RecyclerAdapter adapter;
 
     @Override
@@ -32,10 +33,12 @@ public class ListActivity extends AppCompatActivity {
         Intent intent = getIntent();
         items = intent.getParcelableArrayListExtra(getString(R.string.place_list_item));
         placeImages = intent.getParcelableArrayListExtra(getString(R.string.place_images));
+        placeCredits = intent.getStringArrayListExtra(getString(R.string.place_credits));
 
         for (int i = 0; i < items.size(); i++) {
             PlaceListItem item = items.get(i);
             item.addImage(placeImages.get(i));
+            item.addCredit(placeCredits.get(i));
             items.set(i, item);
         }
 

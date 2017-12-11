@@ -12,6 +12,7 @@ import android.os.Parcelable;
 
 class PlaceListItem implements Parcelable {
     private Bitmap image;
+    private String credit;
     private String name;
     private String description;
 
@@ -59,7 +60,15 @@ class PlaceListItem implements Parcelable {
         return image;
     }
 
+    String getCredit() {
+        return credit;
+    }
+
     void addImage(Bitmap image) {
         this.image = image;
+    }
+
+    void addCredit(String credit) {
+        this.credit = credit;
     }
 }

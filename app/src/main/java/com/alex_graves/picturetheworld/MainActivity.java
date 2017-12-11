@@ -65,6 +65,7 @@ public class MainActivity extends AppCompatActivity implements
 
     private ArrayList<PlaceListItem> items = new ArrayList<>();
     private ArrayList<Bitmap> placeImages = new ArrayList<>();
+    private ArrayList<String> placeCredits = new ArrayList<>();
 
     @BindView(R.id.connect)
     Button connect;
@@ -218,12 +219,10 @@ public class MainActivity extends AppCompatActivity implements
     }
 
     void goToList() {
-        Log.d("items", Integer.toString(items.size()));
-        Log.d("images", Integer.toString(placeImages.size()));
-
         Intent list = new Intent(MainActivity.this, ListActivity.class);
         list.putParcelableArrayListExtra(getString(R.string.place_list_item), items);
         list.putParcelableArrayListExtra(getString(R.string.place_images), placeImages);
+        list.putStringArrayListExtra(getString(R.string.place_credits), placeCredits);
         startActivity(list);
     }
 
@@ -377,7 +376,13 @@ public class MainActivity extends AppCompatActivity implements
                 PlacePhotoMetadata photoMetadata = photoMetadataBuffer.get(0);
                 // Get the attribution text.
                 CharSequence attribution = photoMetadata.getAttributions();
-                Log.d("attrib", attribution.toString());
+                String credit = "";
+                if (attribution.toString().lastIndexOf('<') != -1) {
+                    credit = attribution.subSequence(attribution.toString().indexOf('>') + 1,
+                            attribution.toString().lastIndexOf('<')).toString();
+                }
+                placeCredits.add(credit);
+                Log.d("credit", credit);
                 // Get a scaled bitmap for the photo.
                 Task<PlacePhotoResponse> photoResponse = geoDataClient.getScaledPhoto(photoMetadata, 200, 200);
                 photoResponse.addOnCompleteListener(new OnCompleteListener<PlacePhotoResponse>() {

@@ -28,6 +28,8 @@ class RecyclerAdapter extends RecyclerView.Adapter<RecyclerAdapter.ItemViewHolde
     static class ItemViewHolder extends RecyclerView.ViewHolder {
         @BindView(R.id.item_image)
         ImageView image;
+        @BindView(R.id.item_credit)
+        TextView credit;
         @BindView(R.id.item_place_name)
         TextView name;
         @BindView(R.id.item_description)
@@ -57,5 +59,6 @@ class RecyclerAdapter extends RecyclerView.Adapter<RecyclerAdapter.ItemViewHolde
         holder.name.setText(item.getName());
         holder.description.setText(item.getDescription());
         holder.image.setImageBitmap(item.getImage());
+        holder.credit.setText(item.getCredit());
     }
 }
