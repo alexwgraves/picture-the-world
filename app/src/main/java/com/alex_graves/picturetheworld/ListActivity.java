@@ -19,7 +19,7 @@ public class ListActivity extends AppCompatActivity {
     @BindView(R.id.recycler)
     RecyclerView recyclerView;
 
-    private ArrayList<PlaceListItem> items = new ArrayList<>();
+    private ArrayList<ListItem> items = new ArrayList<>();
     private ArrayList<Bitmap> placeImages = new ArrayList<>();
     private ArrayList<String> placeCredits = new ArrayList<>();
     private RecyclerAdapter adapter;
@@ -36,10 +36,13 @@ public class ListActivity extends AppCompatActivity {
         placeCredits = intent.getStringArrayListExtra(getString(R.string.place_credits));
 
         for (int i = 0; i < items.size(); i++) {
-            PlaceListItem item = items.get(i);
-            item.addImage(placeImages.get(i));
-            item.addCredit(placeCredits.get(i));
-            items.set(i, item);
+            ListItem item = items.get(i);
+            if (item.getListItemType() == ListItem.PLACE) {
+                PlaceListItem place = (PlaceListItem) item;
+                place.addImage(placeImages.get(i));
+                place.addCredit(placeCredits.get(i));
+                items.set(i, item);
+            }
         }
 
         // set up recycler

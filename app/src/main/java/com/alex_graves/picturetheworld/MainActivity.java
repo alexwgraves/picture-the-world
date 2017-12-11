@@ -63,7 +63,7 @@ public class MainActivity extends AppCompatActivity implements
     private PlaceDetectionClient placeClient;
     private FusedLocationProviderClient locationClient;
 
-    private ArrayList<PlaceListItem> items = new ArrayList<>();
+    private ArrayList<ListItem> items = new ArrayList<>();
     private ArrayList<Bitmap> placeImages = new ArrayList<>();
     private ArrayList<String> placeCredits = new ArrayList<>();
 
@@ -380,7 +380,8 @@ public class MainActivity extends AppCompatActivity implements
         }
     }
 
-    private void getPlaceInformation(String placeId) {
+    private void getPlaceInformation(String id) {
+        final String placeId = id;
         // get place image
         final Task<PlacePhotoMetadataResponse> photoMetadataResponse = geoDataClient.getPlacePhotos(placeId);
         photoMetadataResponse.addOnCompleteListener(new OnCompleteListener<PlacePhotoMetadataResponse>() {
@@ -421,7 +422,7 @@ public class MainActivity extends AppCompatActivity implements
                 if (places.getStatus().isSuccess() && places.getCount() > 0) {
                     final Place place = places.get(0);
                     Log.i("place", "Place found: " + place.getName());
-                    PlaceListItem item = new PlaceListItem(place.getName().toString(),
+                    PlaceListItem item = new PlaceListItem(placeId, place.getName().toString(),
                             place.getAddress().toString(), place.getLatLng());
                     items.add(item);
                 } else {

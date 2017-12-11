@@ -12,15 +12,17 @@ import com.google.android.gms.maps.model.LatLng;
  * Holds a place item for displaying in a list of places.
  */
 
-class PlaceListItem implements Parcelable {
-    private Bitmap image;
-    private String credit;
+class PlaceListItem implements ListItem, Parcelable {
+    private String id;
     private String name;
     private String description;
     private double lat;
     private double lng;
+    private Bitmap image;
+    private String credit;
 
-    PlaceListItem(String name, String description, LatLng coords) {
+    PlaceListItem(String id, String name, String description, LatLng coords) {
+        this.id = id;
         this.name = name;
         this.description = description;
         lat = coords.latitude;
@@ -28,10 +30,16 @@ class PlaceListItem implements Parcelable {
     }
 
     PlaceListItem(Parcel in) {
-        this.name = in.readString();
-        this.description = in.readString();
-        this.lat = in.readDouble();
-        this.lng = in.readDouble();
+        id = in.readString();
+        name = in.readString();
+        description = in.readString();
+        lat = in.readDouble();
+        lng = in.readDouble();
+    }
+
+    @Override
+    public int getListItemType() {
+        return ListItem.PLACE;
     }
 
     @Override
@@ -41,6 +49,7 @@ class PlaceListItem implements Parcelable {
 
     @Override
     public void writeToParcel(Parcel dest, int flags) {
+        dest.writeString(id);
         dest.writeString(name);
         dest.writeString(description);
         dest.writeDouble(lat);
@@ -57,6 +66,10 @@ class PlaceListItem implements Parcelable {
             return new PlaceListItem[size];
         }
     };
+
+    String getID() {
+        return id;
+    }
 
     String getName() {
         return name;

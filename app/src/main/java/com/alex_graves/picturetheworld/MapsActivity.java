@@ -84,14 +84,17 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         mMap = googleMap;
 
         // Add a marker at Penn and move the camera
-        LatLng coords = new LatLng(39.952089, -75.193597);
+        LatLng point = new LatLng(39.952089, -75.193597);
+        if (items.size() > 0) {
+            point = new LatLng(items.get(0).getLat(), items.get(0).getLng());
+        }
 
         for (PlaceListItem item : items) {
-            coords = new LatLng(item.getLat(), item.getLng());
+            LatLng coords = new LatLng(item.getLat(), item.getLng());
             mMap.addMarker(new MarkerOptions().position(coords).title(item.getName()));
         }
 
-        mMap.moveCamera(CameraUpdateFactory.newLatLng(coords));
+        mMap.moveCamera(CameraUpdateFactory.newLatLng(point));
         mMap.moveCamera(CameraUpdateFactory.zoomTo(14));
     }
 }
