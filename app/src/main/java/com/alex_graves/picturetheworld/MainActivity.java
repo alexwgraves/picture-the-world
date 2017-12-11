@@ -35,6 +35,7 @@ import com.google.android.gms.location.places.PlacePhotoMetadataBuffer;
 import com.google.android.gms.location.places.PlacePhotoMetadataResponse;
 import com.google.android.gms.location.places.PlacePhotoResponse;
 import com.google.android.gms.location.places.Places;
+import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
@@ -50,8 +51,7 @@ import retrofit2.Callback;
 import retrofit2.Response;
 
 public class MainActivity extends AppCompatActivity implements
-        GoogleApiClient.ConnectionCallbacks,
-        GoogleApiClient.OnConnectionFailedListener {
+        GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener {
     private final String INSTAGRAM_ACCESS_TOKEN = "3597152346.7d0b94c.49d17c5cd0fe4a65a9b34a1bdd1c151a";
 
     private static final int INTERNET_PERMISSION = 1;
@@ -145,6 +145,22 @@ public class MainActivity extends AppCompatActivity implements
                 getPlaceInformation("ChIJ_5CoRebFxokR08ApAyF2KIs");
             }
         });
+
+        // get lists if returning from other activities
+        Intent intent = getIntent();
+        items = intent.getParcelableArrayListExtra(getString(R.string.place_list_item));
+        placeImages = intent.getParcelableArrayListExtra(getString(R.string.place_images));
+        placeCredits = intent.getStringArrayListExtra(getString(R.string.place_credits));
+
+        if (items == null) {
+            items = new ArrayList<>();
+        }
+        if (placeImages == null) {
+            placeImages = new ArrayList<>();
+        }
+        if (placeCredits == null) {
+            placeCredits = new ArrayList<>();
+        }
     }
 
     @Override
@@ -211,10 +227,14 @@ public class MainActivity extends AppCompatActivity implements
     @Override
     public void onConnected(Bundle connectionHint) {
         // TODO ???
+        Log.d("yo", "connected");
     }
 
     void goToMap() {
         Intent map = new Intent(MainActivity.this, MapsActivity.class);
+        map.putParcelableArrayListExtra(getString(R.string.place_list_item), items);
+        map.putParcelableArrayListExtra(getString(R.string.place_images), placeImages);
+        map.putStringArrayListExtra(getString(R.string.place_credits), placeCredits);
         startActivity(map);
     }
 
@@ -360,9 +380,7 @@ public class MainActivity extends AppCompatActivity implements
         }
     }
 
-    private void getPlaceInformation(String id) {
-        final String placeId = id;
-
+    private void getPlaceInformation(String placeId) {
         // get place image
         final Task<PlacePhotoMetadataResponse> photoMetadataResponse = geoDataClient.getPlacePhotos(placeId);
         photoMetadataResponse.addOnCompleteListener(new OnCompleteListener<PlacePhotoMetadataResponse>() {
@@ -403,7 +421,8 @@ public class MainActivity extends AppCompatActivity implements
                 if (places.getStatus().isSuccess() && places.getCount() > 0) {
                     final Place place = places.get(0);
                     Log.i("place", "Place found: " + place.getName());
-                    PlaceListItem item = new PlaceListItem(place.getName().toString(), place.getAddress().toString());
+                    PlaceListItem item = new PlaceListItem(place.getName().toString(),
+                            place.getAddress().toString(), place.getLatLng());
                     items.add(item);
                 } else {
                     Log.e("error", "Place not found");

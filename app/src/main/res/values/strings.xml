@@ -1,10 +1,12 @@
 <resources>
     <string name="app_name">Picture the World</string>
-    <string name="app_description">See and share photos from places around the world!</string>
+    <string name="app_description">Get recommendations of places to go and things to see from all around the world!</string>
     <string name="title_activity_maps">Nearby Places</string>
     <string name="map_view">Map</string>
     <string name="list_view">List</string>
     <string name="home">Home</string>
+
+    <string name="get_started">Get started</string>
 
     <string name="place_name">Place name</string>
     <string name="place_description">Place description</string>

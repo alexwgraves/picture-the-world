@@ -4,36 +4,62 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    tools:context="com.alex_graves.picturetheworld.MainActivity"
-    android:padding="15dp">
+    tools:context="com.alex_graves.picturetheworld.MainActivity">
 
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="@string/app_description"/>
+    <LinearLayout
+        android:orientation="vertical"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:gravity="center"
+        android:background="@color/colorList"
+        android:padding="15dp">
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_margin="15dp"
+            android:textAlignment="center"
+            android:textSize="16sp"
+            android:text="@string/app_description"/>
+    </LinearLayout>
+
+    <LinearLayout
+        android:orientation="vertical"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:gravity="center"
+        android:background="@color/colorMap"
+        android:padding="15dp">
+
+        <Button
+            android:id="@+id/place_photos"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:backgroundTint="@color/colorMapDark"
+            android:text="@string/get_started"/>
+    </LinearLayout>
 
     <Button
         android:id="@+id/connect"
+        android:visibility="gone"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Connect"/>
 
     <Button
         android:id="@+id/find_location"
+        android:visibility="gone"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Find Location"/>
 
     <Button
         android:id="@+id/find_place"
+        android:visibility="gone"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Find Place"/>
-
-    <Button
-        android:id="@+id/place_photos"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Get Place Photos"/>
 
 </LinearLayout>
