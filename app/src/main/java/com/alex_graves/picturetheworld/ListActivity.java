@@ -31,13 +31,11 @@ public class ListActivity extends AppCompatActivity {
 
         Intent intent = getIntent();
         items = intent.getParcelableArrayListExtra(getString(R.string.place_list_item));
-        Log.d("item", Integer.toString(items.size()));
-//        placeImages = intent.getParcelableArrayListExtra(getString(R.string.place_images));
-        Log.d("image", Integer.toString(placeImages.size()));
+        placeImages = intent.getParcelableArrayListExtra(getString(R.string.place_images));
 
         for (int i = 0; i < items.size(); i++) {
             PlaceListItem item = items.get(i);
-//            item.addImage(placeImages.get(i));
+            item.addImage(placeImages.get(i));
             items.set(i, item);
         }
 

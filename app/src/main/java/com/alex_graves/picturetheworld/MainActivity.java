@@ -139,7 +139,9 @@ public class MainActivity extends AppCompatActivity implements
         placePhotos.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                getPhotos();
+                getPlaceInformation("ChIJwcw7f1rGxokRlP7WsqKm6gk");
+                getPlaceInformation("ChIJAbXqKVvGxokR-jgLbG2-R9g");
+                getPlaceInformation("ChIJ_5CoRebFxokR08ApAyF2KIs");
             }
         });
     }
@@ -216,9 +218,12 @@ public class MainActivity extends AppCompatActivity implements
     }
 
     void goToList() {
+        Log.d("items", Integer.toString(items.size()));
+        Log.d("images", Integer.toString(placeImages.size()));
+
         Intent list = new Intent(MainActivity.this, ListActivity.class);
         list.putParcelableArrayListExtra(getString(R.string.place_list_item), items);
-//        list.putParcelableArrayListExtra(getString(R.string.place_images), placeImages);
+        list.putParcelableArrayListExtra(getString(R.string.place_images), placeImages);
         startActivity(list);
     }
 
@@ -356,8 +361,8 @@ public class MainActivity extends AppCompatActivity implements
         }
     }
 
-    private void getPhotos() {
-        final String placeId = "ChIJa147K9HX3IAR-lwiGIQv9i4";
+    private void getPlaceInformation(String id) {
+        final String placeId = id;
 
         // get place image
         final Task<PlacePhotoMetadataResponse> photoMetadataResponse = geoDataClient.getPlacePhotos(placeId);
@@ -372,8 +377,9 @@ public class MainActivity extends AppCompatActivity implements
                 PlacePhotoMetadata photoMetadata = photoMetadataBuffer.get(0);
                 // Get the attribution text.
                 CharSequence attribution = photoMetadata.getAttributions();
-                // Get a full-size bitmap for the photo.
-                Task<PlacePhotoResponse> photoResponse = geoDataClient.getPhoto(photoMetadata);
+                Log.d("attrib", attribution.toString());
+                // Get a scaled bitmap for the photo.
+                Task<PlacePhotoResponse> photoResponse = geoDataClient.getScaledPhoto(photoMetadata, 200, 200);
                 photoResponse.addOnCompleteListener(new OnCompleteListener<PlacePhotoResponse>() {
                     @Override
                     public void onComplete(@NonNull Task<PlacePhotoResponse> task) {
