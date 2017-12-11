@@ -1,17 +1,31 @@
 package com.alex_graves.picturetheworld;
 
 import android.Manifest;
+import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.location.Location;
+import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.Toast;
 
-import com.google.gson.Gson;
+import com.google.android.gms.location.FusedLocationProviderClient;
+import com.google.android.gms.location.LocationRequest;
+import com.google.android.gms.location.LocationServices;
+import com.google.android.gms.location.places.PlaceDetectionClient;
+import com.google.android.gms.location.places.PlaceLikelihood;
+import com.google.android.gms.location.places.PlaceLikelihoodBufferResponse;
+import com.google.android.gms.location.places.Places;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.gms.tasks.Task;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -25,13 +39,23 @@ import retrofit2.Response;
 
 public class MainActivity extends AppCompatActivity {
     private final String INSTAGRAM_ACCESS_TOKEN = "3597152346.7d0b94c.49d17c5cd0fe4a65a9b34a1bdd1c151a";
-    private final String GOOGLE_API_KEY = "AIzaSyBFOVC-vFEa80KDJImwWnKC6hsWktj-978";
+    private final String GOOGLE_API_KEY = "AIzaSyCaYV2cxGRatcZLRxUJ14SZU9gkcrIPbYo";
 
     private static final int INTERNET_PERMISSION = 1;
     private static final int CAMERA_PERMISSION = 2;
+    private static final int LOCATION_PERMISSION = 3;
+
+    private PlaceDetectionClient placeClient;
+    private FusedLocationProviderClient locationClient;
 
     @BindView(R.id.connect)
     Button connect;
+
+    @BindView(R.id.find_location)
+    Button findLocation;
+
+    @BindView(R.id.find_place)
+    Button findPlace;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -39,9 +63,14 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         ButterKnife.bind(this);
 
+        // set up places stuff
+        placeClient = Places.getPlaceDetectionClient(this, null);
+        locationClient = LocationServices.getFusedLocationProviderClient(this);
+
         // handle permissions
         int internet = ContextCompat.checkSelfPermission(this, Manifest.permission.INTERNET);
         int camera = ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA);
+        int location = ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION);
 
         if (internet != PackageManager.PERMISSION_GRANTED) {
             ActivityCompat.requestPermissions(this,
@@ -53,6 +82,11 @@ public class MainActivity extends AppCompatActivity {
                     new String[]{Manifest.permission.CAMERA}, CAMERA_PERMISSION);
         }
 
+        if (location != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(this,
+                    new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, LOCATION_PERMISSION);
+        }
+
         connect.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -60,6 +94,20 @@ public class MainActivity extends AppCompatActivity {
                 getNearbyMedia();
                 getLocations();
                 getLocationMedia();
+            }
+        });
+
+        findPlace.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                getUserPlace();
+            }
+        });
+
+        findLocation.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                getUserLocation();
             }
         });
     }
@@ -81,8 +129,37 @@ public class MainActivity extends AppCompatActivity {
                             "You should grant camera access to use Picture the World fully!",
                             Toast.LENGTH_LONG).show();
                 }
+                return;
+            }
+            case LOCATION_PERMISSION: {
+                if (grantResults.length > 0 && grantResults[0] != PackageManager.PERMISSION_GRANTED) {
+                    Toast.makeText(MainActivity.this,
+                            "You should grant location access to use Picture the World fully!",
+                            Toast.LENGTH_LONG).show();
+                }
             }
         }
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu._menu, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        if (item.getItemId() == R.id.map_view) {
+            goToMap();
+            return true;
+        }
+
+        return super.onOptionsItemSelected(item);
+    }
+
+    void goToMap() {
+        Intent map = new Intent(MainActivity.this, MapsActivity.class);
+        startActivity(map);
     }
 
     void getMedia() {
@@ -169,5 +246,49 @@ public class MainActivity extends AppCompatActivity {
                 Log.d("error", t.toString());
             }
         });
+    }
+
+    void getUserPlace() {
+        int location = ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION);
+        if (location == PackageManager.PERMISSION_GRANTED) {
+            Task<PlaceLikelihoodBufferResponse> placeResult = placeClient.getCurrentPlace(null);
+            placeResult.addOnCompleteListener(new OnCompleteListener<PlaceLikelihoodBufferResponse>() {
+                @Override
+                public void onComplete(@NonNull Task<PlaceLikelihoodBufferResponse> task) {
+                    PlaceLikelihoodBufferResponse likelyPlaces = task.getResult();
+                    for (PlaceLikelihood placeLikelihood : likelyPlaces) {
+                        Log.d("places", String.format("Place '%s' has likelihood: %g",
+                                placeLikelihood.getPlace().getName(),
+                                placeLikelihood.getLikelihood()));
+                    }
+                    likelyPlaces.release();
+                }
+            });
+        } else {
+            ActivityCompat.requestPermissions(this,
+                    new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, LOCATION_PERMISSION);
+        }
+    }
+
+    void getUserLocation() {
+        int location = ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION);
+        if (location == PackageManager.PERMISSION_GRANTED) {
+            locationClient.getLastLocation().addOnSuccessListener(this, new OnSuccessListener<Location>() {
+                @Override
+                public void onSuccess(Location location) {
+                    if (location == null) {
+                        Toast.makeText(MainActivity.this,
+                                "We can't find your location. Try searching for places instead!",
+                                Toast.LENGTH_LONG).show();
+                        return;
+                    }
+                    Log.d("lat", Double.toString(location.getLatitude()));
+                    Log.d("lng", Double.toString(location.getLongitude()));
+                }
+            });
+        } else {
+            ActivityCompat.requestPermissions(this,
+                    new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, LOCATION_PERMISSION);
+        }
     }
 }

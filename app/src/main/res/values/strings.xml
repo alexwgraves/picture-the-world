@@ -1,4 +1,7 @@
 <resources>
     <string name="app_name">Picture the World</string>
     <string name="app_description">See and share photos from places around the world!</string>
+    <string name="title_activity_maps">Nearby Places</string>
+    <string name="map_view">Map</string>
+    <string name="list_view">List</string>
 </resources>
