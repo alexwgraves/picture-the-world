@@ -3,6 +3,12 @@
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <item
+        android:id="@+id/home_view"
+        android:icon="@drawable/ic_home"
+        app:showAsAction="ifRoom"
+        android:title="@string/home"/>
+
+    <item
         android:id="@+id/list_view"
         android:icon="@drawable/ic_places_list"
         app:showAsAction="ifRoom"

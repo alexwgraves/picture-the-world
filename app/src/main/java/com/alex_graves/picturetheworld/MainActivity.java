@@ -16,6 +16,8 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.Toast;
 
+import com.google.android.gms.common.ConnectionResult;
+import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationServices;
@@ -37,14 +39,16 @@ import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements
+        GoogleApiClient.ConnectionCallbacks,
+        GoogleApiClient.OnConnectionFailedListener {
     private final String INSTAGRAM_ACCESS_TOKEN = "3597152346.7d0b94c.49d17c5cd0fe4a65a9b34a1bdd1c151a";
-    private final String GOOGLE_API_KEY = "AIzaSyCaYV2cxGRatcZLRxUJ14SZU9gkcrIPbYo";
 
     private static final int INTERNET_PERMISSION = 1;
     private static final int CAMERA_PERMISSION = 2;
     private static final int LOCATION_PERMISSION = 3;
 
+    private GoogleApiClient googleApiClient;
     private PlaceDetectionClient placeClient;
     private FusedLocationProviderClient locationClient;
 
@@ -64,6 +68,12 @@ public class MainActivity extends AppCompatActivity {
         ButterKnife.bind(this);
 
         // set up places stuff
+        googleApiClient = new GoogleApiClient
+                .Builder(this)
+                .addApi(Places.GEO_DATA_API)
+                .addApi(Places.PLACE_DETECTION_API)
+                .enableAutoManage(this, this)
+                .build();
         placeClient = Places.getPlaceDetectionClient(this, null);
         locationClient = LocationServices.getFusedLocationProviderClient(this);
 
@@ -154,12 +164,38 @@ public class MainActivity extends AppCompatActivity {
             return true;
         }
 
+        if (item.getItemId() == R.id.list_view) {
+            goToList();
+            return true;
+        }
+
         return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    public void onConnectionFailed(ConnectionResult connectionResult) {
+        // TODO ???
+        Log.d("error", connectionResult.getErrorMessage());
+    }
+
+    @Override
+    public void onConnectionSuspended(int cause) {
+        googleApiClient.connect();
+    }
+
+    @Override
+    public void onConnected(Bundle connectionHint) {
+        // TODO ???
     }
 
     void goToMap() {
         Intent map = new Intent(MainActivity.this, MapsActivity.class);
         startActivity(map);
+    }
+
+    void goToList() {
+        Intent list = new Intent(MainActivity.this, ListActivity.class);
+        startActivity(list);
     }
 
     void getMedia() {
@@ -255,13 +291,17 @@ public class MainActivity extends AppCompatActivity {
             placeResult.addOnCompleteListener(new OnCompleteListener<PlaceLikelihoodBufferResponse>() {
                 @Override
                 public void onComplete(@NonNull Task<PlaceLikelihoodBufferResponse> task) {
-                    PlaceLikelihoodBufferResponse likelyPlaces = task.getResult();
-                    for (PlaceLikelihood placeLikelihood : likelyPlaces) {
-                        Log.d("places", String.format("Place '%s' has likelihood: %g",
-                                placeLikelihood.getPlace().getName(),
-                                placeLikelihood.getLikelihood()));
+                    if (task.isSuccessful() && task.getResult() != null) {
+                        PlaceLikelihoodBufferResponse likelyPlaces = task.getResult();
+                        for (PlaceLikelihood placeLikelihood : likelyPlaces) {
+                            Log.d("places", String.format("Place '%s' has likelihood: %g",
+                                    placeLikelihood.getPlace().getName(),
+                                    placeLikelihood.getLikelihood()));
+                        }
+                        likelyPlaces.release();
+                    } else {
+                        Log.d("error", "something is broken");
                     }
-                    likelyPlaces.release();
                 }
             });
         } else {

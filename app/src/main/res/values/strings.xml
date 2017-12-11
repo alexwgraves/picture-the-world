@@ -4,4 +4,5 @@
     <string name="title_activity_maps">Nearby Places</string>
     <string name="map_view">Map</string>
     <string name="list_view">List</string>
+    <string name="home">Home</string>
 </resources>

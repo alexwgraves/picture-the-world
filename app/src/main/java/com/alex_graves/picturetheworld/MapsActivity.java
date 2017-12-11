@@ -38,6 +38,11 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
+        if (item.getItemId() == R.id.home_view) {
+            goToMain();
+            return true;
+        }
+
         if (item.getItemId() == R.id.list_view) {
             goToList();
             return true;
@@ -46,8 +51,13 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         return super.onOptionsItemSelected(item);
     }
 
+    void goToMain() {
+        Intent home = new Intent(MapsActivity.this, MainActivity.class);
+        startActivity(home);
+    }
+
     void goToList() {
-        Intent list = new Intent(MapsActivity.this, MainActivity.class);
+        Intent list = new Intent(MapsActivity.this, ListActivity.class);
         startActivity(list);
     }
 
