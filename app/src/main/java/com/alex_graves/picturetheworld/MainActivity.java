@@ -148,18 +148,18 @@ public class MainActivity extends AppCompatActivity implements
 
         // get lists if returning from other activities
         Intent intent = getIntent();
-        items = intent.getParcelableArrayListExtra(getString(R.string.place_list_item));
-        placeImages = intent.getParcelableArrayListExtra(getString(R.string.place_images));
-        placeCredits = intent.getStringArrayListExtra(getString(R.string.place_credits));
+        ArrayList<ListItem> receivedItems = intent.getParcelableArrayListExtra(getString(R.string.place_list_item));
+        ArrayList<Bitmap> receivedImages = intent.getParcelableArrayListExtra(getString(R.string.place_images));
+        ArrayList<String> receivedCredits = intent.getStringArrayListExtra(getString(R.string.place_credits));
 
-        if (items == null) {
-            items = new ArrayList<>();
+        if (receivedItems != null) {
+            items = receivedItems;
         }
-        if (placeImages == null) {
-            placeImages = new ArrayList<>();
+        if (receivedImages != null) {
+            placeImages = receivedImages;
         }
-        if (placeCredits == null) {
-            placeCredits = new ArrayList<>();
+        if (receivedCredits != null) {
+            placeCredits = receivedCredits;
         }
     }
 
@@ -382,53 +382,57 @@ public class MainActivity extends AppCompatActivity implements
 
     private void getPlaceInformation(String id) {
         final String placeId = id;
+
         // get place image
         final Task<PlacePhotoMetadataResponse> photoMetadataResponse = geoDataClient.getPlacePhotos(placeId);
         photoMetadataResponse.addOnCompleteListener(new OnCompleteListener<PlacePhotoMetadataResponse>() {
             @Override
             public void onComplete(@NonNull Task<PlacePhotoMetadataResponse> task) {
-                // Get the list of photos.
-                PlacePhotoMetadataResponse photos = task.getResult();
-                // Get the PlacePhotoMetadataBuffer (metadata for all of the photos).
-                PlacePhotoMetadataBuffer photoMetadataBuffer = photos.getPhotoMetadata();
-                // Get the first photo in the list.
-                PlacePhotoMetadata photoMetadata = photoMetadataBuffer.get(0);
-                // Get the attribution text.
-                CharSequence attribution = photoMetadata.getAttributions();
-                String credit = "";
-                if (attribution.toString().lastIndexOf('<') != -1) {
-                    credit = attribution.subSequence(attribution.toString().indexOf('>') + 1,
-                            attribution.toString().lastIndexOf('<')).toString();
-                }
-                placeCredits.add(credit);
-                Log.d("credit", credit);
-                // Get a scaled bitmap for the photo.
-                Task<PlacePhotoResponse> photoResponse = geoDataClient.getScaledPhoto(photoMetadata, 200, 200);
-                photoResponse.addOnCompleteListener(new OnCompleteListener<PlacePhotoResponse>() {
-                    @Override
-                    public void onComplete(@NonNull Task<PlacePhotoResponse> task) {
-                        PlacePhotoResponse photo = task.getResult();
-                        Bitmap bitmap = photo.getBitmap();
-                        placeImages.add(bitmap);
+                if (task.isSuccessful()) {
+                    // Get the list of photos.
+                    PlacePhotoMetadataResponse photos = task.getResult();
+                    // Get the PlacePhotoMetadataBuffer (metadata for all of the photos).
+                    PlacePhotoMetadataBuffer photoMetadataBuffer = photos.getPhotoMetadata();
+                    // Get the first photo in the list.
+                    PlacePhotoMetadata photoMetadata = photoMetadataBuffer.get(0);
+                    // Get the attribution text.
+                    CharSequence attribution = photoMetadata.getAttributions();
+                    String credit = "";
+                    if (attribution.toString().lastIndexOf('<') != -1) {
+                        credit = attribution.subSequence(attribution.toString().indexOf('>') + 1,
+                                attribution.toString().lastIndexOf('<')).toString();
                     }
-                });
-                photoMetadataBuffer.release();
-            }
-        });
+                    placeCredits.add(credit);
+                    Log.d("credit", credit);
+                    // Get a scaled bitmap for the photo.
+                    Task<PlacePhotoResponse> photoResponse = geoDataClient.getScaledPhoto(photoMetadata, 200, 200);
+                    photoResponse.addOnCompleteListener(new OnCompleteListener<PlacePhotoResponse>() {
+                        @Override
+                        public void onComplete(@NonNull Task<PlacePhotoResponse> task) {
+                            PlacePhotoResponse photo = task.getResult();
+                            Bitmap bitmap = photo.getBitmap();
+                            placeImages.add(bitmap);
+                        }
+                    });
+                    photoMetadataBuffer.release();
 
-        Places.GeoDataApi.getPlaceById(googleApiClient, placeId).setResultCallback(new ResultCallback<PlaceBuffer>() {
-            @Override
-            public void onResult(PlaceBuffer places) {
-                if (places.getStatus().isSuccess() && places.getCount() > 0) {
-                    final Place place = places.get(0);
-                    Log.i("place", "Place found: " + place.getName());
-                    PlaceListItem item = new PlaceListItem(placeId, place.getName().toString(),
-                            place.getAddress().toString(), place.getLatLng());
-                    items.add(item);
-                } else {
-                    Log.e("error", "Place not found");
+                    // only get the rest of the information if we were able to get the photo
+                    Places.GeoDataApi.getPlaceById(googleApiClient, placeId).setResultCallback(new ResultCallback<PlaceBuffer>() {
+                        @Override
+                        public void onResult(PlaceBuffer places) {
+                            if (places.getStatus().isSuccess() && places.getCount() > 0) {
+                                final Place place = places.get(0);
+                                Log.i("place", "Place found: " + place.getName());
+                                PlaceListItem item = new PlaceListItem(placeId, place.getName().toString(),
+                                        place.getAddress().toString(), place.getLatLng());
+                                items.add(item);
+                            } else {
+                                Log.e("error", "Place not found");
+                            }
+                            places.release();
+                        }
+                    });
                 }
-                places.release();
             }
         });
     }

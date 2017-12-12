@@ -22,7 +22,7 @@ import butterknife.ButterKnife;
 public class MapsActivity extends AppCompatActivity implements OnMapReadyCallback {
     private GoogleMap mMap;
 
-    private ArrayList<PlaceListItem> items = new ArrayList<>();
+    private ArrayList<ListItem> items = new ArrayList<>();
     private ArrayList<Bitmap> placeImages = new ArrayList<>();
     private ArrayList<String> placeCredits = new ArrayList<>();
 
@@ -36,10 +36,21 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                 .findFragmentById(R.id.map);
         map.getMapAsync(this);
 
+        // get lists if returning from other activities
         Intent intent = getIntent();
-        items = intent.getParcelableArrayListExtra(getString(R.string.place_list_item));
-        placeImages = intent.getParcelableArrayListExtra(getString(R.string.place_images));
-        placeCredits = intent.getStringArrayListExtra(getString(R.string.place_credits));
+        ArrayList<ListItem> receivedItems = intent.getParcelableArrayListExtra(getString(R.string.place_list_item));
+        ArrayList<Bitmap> receivedImages = intent.getParcelableArrayListExtra(getString(R.string.place_images));
+        ArrayList<String> receivedCredits = intent.getStringArrayListExtra(getString(R.string.place_credits));
+
+        if (receivedItems != null) {
+            items = receivedItems;
+        }
+        if (receivedImages != null) {
+            placeImages = receivedImages;
+        }
+        if (receivedCredits != null) {
+            placeCredits = receivedCredits;
+        }
     }
 
     @Override
@@ -85,13 +96,17 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
 
         // Add a marker at Penn and move the camera
         LatLng point = new LatLng(39.952089, -75.193597);
-        if (items.size() > 0) {
-            point = new LatLng(items.get(0).getLat(), items.get(0).getLng());
+        if (items.size() > 0 && items.get(0).getListItemType() == ListItem.PLACE) {
+            PlaceListItem place = (PlaceListItem) items.get(0);
+            point = new LatLng(place.getLat(), place.getLng());
         }
 
-        for (PlaceListItem item : items) {
-            LatLng coords = new LatLng(item.getLat(), item.getLng());
-            mMap.addMarker(new MarkerOptions().position(coords).title(item.getName()));
+        for (ListItem item : items) {
+            if (item.getListItemType() == ListItem.PLACE) {
+                PlaceListItem place = (PlaceListItem) item;
+                LatLng coords = new LatLng(place.getLat(), place.getLng());
+                mMap.addMarker(new MarkerOptions().position(coords).title(place.getName()));
+            }
         }
 
         mMap.moveCamera(CameraUpdateFactory.newLatLng(point));

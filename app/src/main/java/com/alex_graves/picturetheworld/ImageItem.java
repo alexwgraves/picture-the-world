@@ -1,5 +1,6 @@
 package com.alex_graves.picturetheworld;
 
+import android.graphics.Bitmap;
 import android.os.Parcel;
 import android.os.Parcelable;
 
@@ -10,19 +11,18 @@ import android.os.Parcelable;
  */
 
 class ImageItem implements ListItem, Parcelable {
-    private String url;
-    private String description;
+    private String id;
+    private Bitmap image;
     private String credit;
 
-    ImageItem(String url, String description, String credit) {
-        this.url = url;
-        this.description = description;
+    ImageItem(String id, Bitmap image, String credit) {
+        this.id = id;
+        this.image = image;
         this.credit = credit;
     }
 
     ImageItem(Parcel in) {
-        url = in.readString();
-        description = in.readString();
+        id = in.readString();
         credit = in.readString();
     }
 
@@ -38,8 +38,6 @@ class ImageItem implements ListItem, Parcelable {
 
     @Override
     public void writeToParcel(Parcel dest, int flags) {
-        dest.writeString(url);
-        dest.writeString(description);
         dest.writeString(credit);
     }
 
@@ -54,12 +52,12 @@ class ImageItem implements ListItem, Parcelable {
         }
     };
 
-    String getURL() {
-        return url;
+    String getID() {
+        return id;
     }
 
-    String getDescription() {
-        return description;
+    Bitmap getImage() {
+        return image;
     }
 
     String getCredit() {

@@ -11,7 +11,9 @@
     <string name="place_name">Place name</string>
     <string name="place_description">Place description</string>
     <string name="place_credit">Place credit</string>
+
     <string name="place_list_item">place_list_item</string>
     <string name="place_images">place_images</string>
     <string name="place_credits">place_credits</string>
+    <string name="place_id">place_id</string>
 </resources>

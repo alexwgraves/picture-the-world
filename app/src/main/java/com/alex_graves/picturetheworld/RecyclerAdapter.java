@@ -1,9 +1,12 @@
 package com.alex_graves.picturetheworld;
 
+import android.content.Intent;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -48,10 +51,24 @@ class RecyclerAdapter extends RecyclerView.Adapter<RecyclerAdapter.ViewHolder> {
         PlaceViewHolder(View v) {
             super(v);
             ButterKnife.bind(this, v);
+
+            v.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    final int position = getAdapterPosition();
+                    ListItem item = items.get(position);
+                    if (item.getListItemType() == ListItem.PLACE) {
+                        PlaceListItem place = (PlaceListItem) item;
+                        Intent intent = new Intent(view.getContext(), PlaceActivity.class);
+                        intent.putExtra(view.getContext().getString(R.string.place_id), place.getID());
+                        view.getContext().startActivity(intent);
+                    }
+                }
+            });
         }
 
         public void bindType(ListItem item) {
-            PlaceListItem place = (PlaceListItem) item;
+            final PlaceListItem place = (PlaceListItem) item;
             name.setText(place.getName());
             description.setText(place.getDescription());
             image.setImageBitmap(place.getImage());
@@ -64,8 +81,6 @@ class RecyclerAdapter extends RecyclerView.Adapter<RecyclerAdapter.ViewHolder> {
         ImageView image;
         @BindView(R.id.item_credit)
         TextView credit;
-        @BindView(R.id.item_description)
-        TextView description;
 
         ImageViewHolder(View v) {
             super(v);
@@ -74,9 +89,8 @@ class RecyclerAdapter extends RecyclerView.Adapter<RecyclerAdapter.ViewHolder> {
 
         public void bindType(ListItem item) {
             ImageItem photo = (ImageItem) item;
-            Picasso.with(image.getContext()).load(photo.getURL());
+            image.setImageBitmap(photo.getImage());
             credit.setText(photo.getCredit());
-            description.setText(photo.getDescription());
         }
     }
 

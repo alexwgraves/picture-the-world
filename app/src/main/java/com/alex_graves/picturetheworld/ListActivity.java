@@ -9,6 +9,7 @@ import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.MotionEvent;
 
 import java.util.ArrayList;
 
@@ -30,11 +31,23 @@ public class ListActivity extends AppCompatActivity {
         setContentView(R.layout.activity_list);
         ButterKnife.bind(this);
 
+        // get lists if returning from other activities
         Intent intent = getIntent();
-        items = intent.getParcelableArrayListExtra(getString(R.string.place_list_item));
-        placeImages = intent.getParcelableArrayListExtra(getString(R.string.place_images));
-        placeCredits = intent.getStringArrayListExtra(getString(R.string.place_credits));
+        ArrayList<ListItem> receivedItems = intent.getParcelableArrayListExtra(getString(R.string.place_list_item));
+        ArrayList<Bitmap> receivedImages = intent.getParcelableArrayListExtra(getString(R.string.place_images));
+        ArrayList<String> receivedCredits = intent.getStringArrayListExtra(getString(R.string.place_credits));
 
+        if (receivedItems != null) {
+            items = receivedItems;
+        }
+        if (receivedImages != null) {
+            placeImages = receivedImages;
+        }
+        if (receivedCredits != null) {
+            placeCredits = receivedCredits;
+        }
+
+        // add images and credits to items
         for (int i = 0; i < items.size(); i++) {
             ListItem item = items.get(i);
             if (item.getListItemType() == ListItem.PLACE) {
