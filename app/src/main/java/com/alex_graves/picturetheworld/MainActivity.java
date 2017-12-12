@@ -21,7 +21,9 @@ import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.common.api.ResultCallback;
 import com.google.android.gms.location.FusedLocationProviderClient;
+import com.google.android.gms.location.LocationCallback;
 import com.google.android.gms.location.LocationRequest;
+import com.google.android.gms.location.LocationResult;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.location.places.GeoDataClient;
 import com.google.android.gms.location.places.Place;
@@ -62,6 +64,8 @@ public class MainActivity extends AppCompatActivity implements
     private GeoDataClient geoDataClient;
     private PlaceDetectionClient placeClient;
     private FusedLocationProviderClient locationClient;
+    private LocationRequest locationRequest;
+    private LocationCallback locationCallback;
 
     private ArrayList<ListItem> items = new ArrayList<>();
     private ArrayList<Bitmap> placeImages = new ArrayList<>();
@@ -79,17 +83,6 @@ public class MainActivity extends AppCompatActivity implements
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         ButterKnife.bind(this);
-
-        // set up places stuff
-        googleApiClient = new GoogleApiClient
-                .Builder(this)
-                .addApi(Places.GEO_DATA_API)
-                .addApi(Places.PLACE_DETECTION_API)
-                .enableAutoManage(this, this)
-                .build();
-        geoDataClient = Places.getGeoDataClient(this, null);
-        placeClient = Places.getPlaceDetectionClient(this, null);
-        locationClient = LocationServices.getFusedLocationProviderClient(this);
 
         // handle permissions
         int internet = ContextCompat.checkSelfPermission(this, Manifest.permission.INTERNET);
@@ -110,6 +103,30 @@ public class MainActivity extends AppCompatActivity implements
             ActivityCompat.requestPermissions(this,
                     new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, LOCATION_PERMISSION);
         }
+
+        // set up places stuff
+        googleApiClient = new GoogleApiClient
+                .Builder(this)
+                .addApi(Places.GEO_DATA_API)
+                .addApi(Places.PLACE_DETECTION_API)
+                .enableAutoManage(this, this)
+                .build();
+        geoDataClient = Places.getGeoDataClient(this, null);
+        placeClient = Places.getPlaceDetectionClient(this, null);
+        locationClient = LocationServices.getFusedLocationProviderClient(this);
+        locationRequest = new LocationRequest();
+        locationCallback = new LocationCallback() {
+            @Override
+            public void onLocationResult(LocationResult locationResult) {
+                for (Location location : locationResult.getLocations()) {
+                    Log.d("lat", Double.toString(location.getLatitude()));
+                    Log.d("lng", Double.toString(location.getLongitude()));
+                }
+            }
+        };
+
+        // get user location
+        startLocationUpdates();
 
         connect.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -193,7 +210,6 @@ public class MainActivity extends AppCompatActivity implements
 
     @Override
     public void onConnectionFailed(ConnectionResult connectionResult) {
-        // TODO ???
         Log.d("error", connectionResult.getErrorMessage());
     }
 
@@ -204,8 +220,32 @@ public class MainActivity extends AppCompatActivity implements
 
     @Override
     public void onConnected(Bundle connectionHint) {
-        // TODO ???
-        Log.d("yo", "connected");
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        stopLocationUpdates();
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        startLocationUpdates();
+    }
+
+    private void stopLocationUpdates() {
+        locationClient.removeLocationUpdates(locationCallback);
+    }
+
+    void startLocationUpdates() {
+        int location = ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION);
+        if (location == PackageManager.PERMISSION_GRANTED) {
+            locationClient.requestLocationUpdates(locationRequest, locationCallback, null);
+        } else {
+            ActivityCompat.requestPermissions(this,
+                    new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, LOCATION_PERMISSION);
+        }
     }
 
     void goToMap() {
