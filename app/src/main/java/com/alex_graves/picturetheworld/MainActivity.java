@@ -73,8 +73,6 @@ public class MainActivity extends AppCompatActivity implements
     Button findLocation;
     @BindView(R.id.find_place)
     Button findPlace;
-    @BindView(R.id.place_photos)
-    Button placePhotos;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -137,30 +135,10 @@ public class MainActivity extends AppCompatActivity implements
             }
         });
 
-        placePhotos.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                getPlaceInformation("ChIJwcw7f1rGxokRlP7WsqKm6gk");
-                getPlaceInformation("ChIJAbXqKVvGxokR-jgLbG2-R9g");
-                getPlaceInformation("ChIJ_5CoRebFxokR08ApAyF2KIs");
-            }
-        });
-
-        // get lists if returning from other activities
-        Intent intent = getIntent();
-        ArrayList<ListItem> receivedItems = intent.getParcelableArrayListExtra(getString(R.string.place_list_item));
-        ArrayList<Bitmap> receivedImages = intent.getParcelableArrayListExtra(getString(R.string.place_images));
-        ArrayList<String> receivedCredits = intent.getStringArrayListExtra(getString(R.string.place_credits));
-
-        if (receivedItems != null) {
-            items = receivedItems;
-        }
-        if (receivedImages != null) {
-            placeImages = receivedImages;
-        }
-        if (receivedCredits != null) {
-            placeCredits = receivedCredits;
-        }
+        // get nearby places
+        getPlaceInformation("ChIJwcw7f1rGxokRlP7WsqKm6gk");
+        getPlaceInformation("ChIJAbXqKVvGxokR-jgLbG2-R9g");
+        getPlaceInformation("ChIJ_5CoRebFxokR08ApAyF2KIs");
     }
 
     @Override

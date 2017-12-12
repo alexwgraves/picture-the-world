@@ -76,9 +76,6 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
 
     void goToMain() {
         Intent home = new Intent(MapsActivity.this, MainActivity.class);
-        home.putParcelableArrayListExtra(getString(R.string.place_list_item), items);
-        home.putParcelableArrayListExtra(getString(R.string.place_images), placeImages);
-        home.putStringArrayListExtra(getString(R.string.place_credits), placeCredits);
         startActivity(home);
     }
 

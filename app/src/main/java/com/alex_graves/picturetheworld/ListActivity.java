@@ -88,9 +88,6 @@ public class ListActivity extends AppCompatActivity {
 
     void goToMain() {
         Intent home = new Intent(ListActivity.this, MainActivity.class);
-        home.putParcelableArrayListExtra(getString(R.string.place_list_item), items);
-        home.putParcelableArrayListExtra(getString(R.string.place_images), placeImages);
-        home.putStringArrayListExtra(getString(R.string.place_credits), placeCredits);
         startActivity(home);
     }
 

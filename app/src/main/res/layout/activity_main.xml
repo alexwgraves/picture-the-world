@@ -34,11 +34,11 @@
         android:padding="15dp">
 
         <Button
-            android:id="@+id/place_photos"
+            android:id="@+id/find_location"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:backgroundTint="@color/colorMapDark"
-            android:text="@string/get_started"/>
+            android:text="@string/find_location"/>
     </LinearLayout>
 
     <Button
@@ -47,13 +47,6 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Connect"/>
-
-    <Button
-        android:id="@+id/find_location"
-        android:visibility="gone"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Find Location"/>
 
     <Button
         android:id="@+id/find_place"
