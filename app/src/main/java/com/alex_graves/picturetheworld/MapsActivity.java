@@ -4,6 +4,7 @@ import android.content.Intent;
 import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 
@@ -23,8 +24,8 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     private GoogleMap mMap;
 
     private ArrayList<ListItem> items = new ArrayList<>();
-    private ArrayList<Bitmap> placeImages = new ArrayList<>();
-    private ArrayList<String> placeCredits = new ArrayList<>();
+    private double currentLat = 39.9583583;
+    private double currentLng = -75.1953933;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -39,17 +40,11 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         // get lists if returning from other activities
         Intent intent = getIntent();
         ArrayList<ListItem> receivedItems = intent.getParcelableArrayListExtra(getString(R.string.place_list_item));
-        ArrayList<Bitmap> receivedImages = intent.getParcelableArrayListExtra(getString(R.string.place_images));
-        ArrayList<String> receivedCredits = intent.getStringArrayListExtra(getString(R.string.place_credits));
+        currentLat = intent.getDoubleExtra(getString(R.string.current_lat), 39.9583583);
+        currentLng = intent.getDoubleExtra(getString(R.string.current_lng), -75.1953933);
 
         if (receivedItems != null) {
             items = receivedItems;
-        }
-        if (receivedImages != null) {
-            placeImages = receivedImages;
-        }
-        if (receivedCredits != null) {
-            placeCredits = receivedCredits;
         }
     }
 
@@ -82,8 +77,8 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     void goToList() {
         Intent list = new Intent(MapsActivity.this, ListActivity.class);
         list.putParcelableArrayListExtra(getString(R.string.place_list_item), items);
-        list.putParcelableArrayListExtra(getString(R.string.place_images), placeImages);
-        list.putStringArrayListExtra(getString(R.string.place_credits), placeCredits);
+        list.putExtra(getString(R.string.current_lat), currentLat);
+        list.putExtra(getString(R.string.current_lng), currentLng);
         startActivity(list);
     }
 
@@ -91,12 +86,11 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
 
-        // Add a marker at Penn and move the camera
-        LatLng point = new LatLng(39.952089, -75.193597);
-        if (items.size() > 0 && items.get(0).getListItemType() == ListItem.PLACE) {
-            PlaceListItem place = (PlaceListItem) items.get(0);
-            point = new LatLng(place.getLat(), place.getLng());
-        }
+        // Add a marker at current location and move the camera
+        Log.d("current lat", Double.toString(currentLat));
+        Log.d("current lng", Double.toString(currentLng));
+        LatLng point = new LatLng(currentLat, currentLng);
+        mMap.addMarker(new MarkerOptions().position(point).title("You are here!")).showInfoWindow();
 
         for (ListItem item : items) {
             if (item.getListItemType() == ListItem.PLACE) {
@@ -107,6 +101,6 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         }
 
         mMap.moveCamera(CameraUpdateFactory.newLatLng(point));
-        mMap.moveCamera(CameraUpdateFactory.zoomTo(14));
+        mMap.moveCamera(CameraUpdateFactory.zoomTo(17));
     }
 }

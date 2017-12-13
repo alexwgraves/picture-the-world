@@ -21,9 +21,10 @@ public class ListActivity extends AppCompatActivity {
     RecyclerView recyclerView;
 
     private ArrayList<ListItem> items = new ArrayList<>();
-    private ArrayList<Bitmap> placeImages = new ArrayList<>();
-    private ArrayList<String> placeCredits = new ArrayList<>();
     private RecyclerAdapter adapter;
+
+    private double currentLat;
+    private double currentLng;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -34,28 +35,9 @@ public class ListActivity extends AppCompatActivity {
         // get lists if returning from other activities
         Intent intent = getIntent();
         ArrayList<ListItem> receivedItems = intent.getParcelableArrayListExtra(getString(R.string.place_list_item));
-        ArrayList<Bitmap> receivedImages = intent.getParcelableArrayListExtra(getString(R.string.place_images));
-        ArrayList<String> receivedCredits = intent.getStringArrayListExtra(getString(R.string.place_credits));
 
         if (receivedItems != null) {
             items = receivedItems;
-        }
-        if (receivedImages != null) {
-            placeImages = receivedImages;
-        }
-        if (receivedCredits != null) {
-            placeCredits = receivedCredits;
-        }
-
-        // add images and credits to items
-        for (int i = 0; i < items.size(); i++) {
-            ListItem item = items.get(i);
-            if (item.getListItemType() == ListItem.PLACE) {
-                PlaceListItem place = (PlaceListItem) item;
-                place.addImage(placeImages.get(i));
-                place.addCredit(placeCredits.get(i));
-                items.set(i, item);
-            }
         }
 
         // set up recycler
@@ -94,8 +76,8 @@ public class ListActivity extends AppCompatActivity {
     void goToMap() {
         Intent map = new Intent(ListActivity.this, MapsActivity.class);
         map.putParcelableArrayListExtra(getString(R.string.place_list_item), items);
-        map.putParcelableArrayListExtra(getString(R.string.place_images), placeImages);
-        map.putStringArrayListExtra(getString(R.string.place_credits), placeCredits);
+        map.putExtra(getString(R.string.current_lat), currentLat);
+        map.putExtra(getString(R.string.current_lng), currentLng);
         startActivity(map);
     }
 }

@@ -39,10 +39,6 @@ class RecyclerAdapter extends RecyclerView.Adapter<RecyclerAdapter.ViewHolder> {
     }
 
     class PlaceViewHolder extends ViewHolder {
-        @BindView(R.id.item_image)
-        ImageView image;
-        @BindView(R.id.item_credit)
-        TextView credit;
         @BindView(R.id.item_place_name)
         TextView name;
         @BindView(R.id.item_description)
@@ -71,8 +67,6 @@ class RecyclerAdapter extends RecyclerView.Adapter<RecyclerAdapter.ViewHolder> {
             final PlaceListItem place = (PlaceListItem) item;
             name.setText(place.getName());
             description.setText(place.getDescription());
-            image.setImageBitmap(place.getImage());
-            credit.setText(place.getCredit());
         }
     }
 

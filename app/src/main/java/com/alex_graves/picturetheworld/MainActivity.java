@@ -44,6 +44,7 @@ import com.google.android.gms.tasks.Task;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import butterknife.BindView;
@@ -67,14 +68,13 @@ public class MainActivity extends AppCompatActivity implements
     private LocationRequest locationRequest;
     private LocationCallback locationCallback;
 
+    private double currentLat = 39.9583583;
+    private double currentLng = -75.1953933;
+    private ArrayList<String> placeIds = new ArrayList<>();
     private ArrayList<ListItem> items = new ArrayList<>();
-    private ArrayList<Bitmap> placeImages = new ArrayList<>();
-    private ArrayList<String> placeCredits = new ArrayList<>();
 
     @BindView(R.id.connect)
     Button connect;
-    @BindView(R.id.find_location)
-    Button findLocation;
     @BindView(R.id.find_place)
     Button findPlace;
 
@@ -119,8 +119,8 @@ public class MainActivity extends AppCompatActivity implements
             @Override
             public void onLocationResult(LocationResult locationResult) {
                 for (Location location : locationResult.getLocations()) {
-                    Log.d("lat", Double.toString(location.getLatitude()));
-                    Log.d("lng", Double.toString(location.getLongitude()));
+                    currentLat = location.getLatitude();
+                    currentLng = location.getLongitude();
                 }
             }
         };
@@ -131,10 +131,7 @@ public class MainActivity extends AppCompatActivity implements
         connect.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                getMedia();
-                getNearbyMedia();
-                getLocations();
-                getLocationMedia();
+                getNearbyPlacesInformation();
             }
         });
 
@@ -145,17 +142,8 @@ public class MainActivity extends AppCompatActivity implements
             }
         });
 
-        findLocation.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                getUserLocation();
-            }
-        });
-
-        // get nearby places
-        getPlaceInformation("ChIJwcw7f1rGxokRlP7WsqKm6gk");
-        getPlaceInformation("ChIJAbXqKVvGxokR-jgLbG2-R9g");
-        getPlaceInformation("ChIJ_5CoRebFxokR08ApAyF2KIs");
+        Log.d("lat", Double.toString(currentLat));
+        Log.d("lng", Double.toString(currentLng));
     }
 
     @Override
@@ -251,17 +239,23 @@ public class MainActivity extends AppCompatActivity implements
     void goToMap() {
         Intent map = new Intent(MainActivity.this, MapsActivity.class);
         map.putParcelableArrayListExtra(getString(R.string.place_list_item), items);
-        map.putParcelableArrayListExtra(getString(R.string.place_images), placeImages);
-        map.putStringArrayListExtra(getString(R.string.place_credits), placeCredits);
+        map.putExtra(getString(R.string.current_lat), currentLat);
+        map.putExtra(getString(R.string.current_lng), currentLng);
         startActivity(map);
     }
 
     void goToList() {
         Intent list = new Intent(MainActivity.this, ListActivity.class);
         list.putParcelableArrayListExtra(getString(R.string.place_list_item), items);
-        list.putParcelableArrayListExtra(getString(R.string.place_images), placeImages);
-        list.putStringArrayListExtra(getString(R.string.place_credits), placeCredits);
+        list.putExtra(getString(R.string.current_lat), currentLat);
+        list.putExtra(getString(R.string.current_lng), currentLng);
         startActivity(list);
+    }
+
+    void getNearbyPlacesInformation() {
+        for (String id : placeIds) {
+            getPlaceInformation(id);
+        }
     }
 
     void getMedia() {
@@ -360,13 +354,16 @@ public class MainActivity extends AppCompatActivity implements
                     if (task.isSuccessful() && task.getResult() != null) {
                         PlaceLikelihoodBufferResponse likelyPlaces = task.getResult();
                         for (PlaceLikelihood placeLikelihood : likelyPlaces) {
+                            placeIds.add(placeLikelihood.getPlace().getId());
                             Log.d("places", String.format("Place '%s' has likelihood: %g",
                                     placeLikelihood.getPlace().getName(),
                                     placeLikelihood.getLikelihood()));
                         }
                         likelyPlaces.release();
                     } else {
-                        Log.d("error", "something is broken");
+                        Toast.makeText(MainActivity.this,
+                                "We can't find your current place. Try searching instead!",
+                                Toast.LENGTH_LONG).show();
                     }
                 }
             });
@@ -401,56 +398,19 @@ public class MainActivity extends AppCompatActivity implements
     private void getPlaceInformation(String id) {
         final String placeId = id;
 
-        // get place image
-        final Task<PlacePhotoMetadataResponse> photoMetadataResponse = geoDataClient.getPlacePhotos(placeId);
-        photoMetadataResponse.addOnCompleteListener(new OnCompleteListener<PlacePhotoMetadataResponse>() {
+        Places.GeoDataApi.getPlaceById(googleApiClient, placeId).setResultCallback(new ResultCallback<PlaceBuffer>() {
             @Override
-            public void onComplete(@NonNull Task<PlacePhotoMetadataResponse> task) {
-                if (task.isSuccessful()) {
-                    // Get the list of photos.
-                    PlacePhotoMetadataResponse photos = task.getResult();
-                    // Get the PlacePhotoMetadataBuffer (metadata for all of the photos).
-                    PlacePhotoMetadataBuffer photoMetadataBuffer = photos.getPhotoMetadata();
-                    // Get the first photo in the list.
-                    PlacePhotoMetadata photoMetadata = photoMetadataBuffer.get(0);
-                    // Get the attribution text.
-                    CharSequence attribution = photoMetadata.getAttributions();
-                    String credit = "";
-                    if (attribution.toString().lastIndexOf('<') != -1) {
-                        credit = attribution.subSequence(attribution.toString().indexOf('>') + 1,
-                                attribution.toString().lastIndexOf('<')).toString();
-                    }
-                    placeCredits.add(credit);
-                    Log.d("credit", credit);
-                    // Get a scaled bitmap for the photo.
-                    Task<PlacePhotoResponse> photoResponse = geoDataClient.getScaledPhoto(photoMetadata, 200, 200);
-                    photoResponse.addOnCompleteListener(new OnCompleteListener<PlacePhotoResponse>() {
-                        @Override
-                        public void onComplete(@NonNull Task<PlacePhotoResponse> task) {
-                            PlacePhotoResponse photo = task.getResult();
-                            Bitmap bitmap = photo.getBitmap();
-                            placeImages.add(bitmap);
-                        }
-                    });
-                    photoMetadataBuffer.release();
-
-                    // only get the rest of the information if we were able to get the photo
-                    Places.GeoDataApi.getPlaceById(googleApiClient, placeId).setResultCallback(new ResultCallback<PlaceBuffer>() {
-                        @Override
-                        public void onResult(PlaceBuffer places) {
-                            if (places.getStatus().isSuccess() && places.getCount() > 0) {
-                                final Place place = places.get(0);
-                                Log.i("place", "Place found: " + place.getName());
-                                PlaceListItem item = new PlaceListItem(placeId, place.getName().toString(),
-                                        place.getAddress().toString(), place.getLatLng());
-                                items.add(item);
-                            } else {
-                                Log.e("error", "Place not found");
-                            }
-                            places.release();
-                        }
-                    });
+            public void onResult(PlaceBuffer places) {
+                if (places.getStatus().isSuccess() && places.getCount() > 0) {
+                    final Place place = places.get(0);
+                    Log.i("place", "Place found: " + place.getName());
+                    // TODO parse place types
+                    List<Integer> types = place.getPlaceTypes();
+                    PlaceListItem item = new PlaceListItem(placeId, place.getName().toString(),
+                            place.getAddress().toString(), "", place.getLatLng());
+                    items.add(item);
                 }
+                places.release();
             }
         });
     }

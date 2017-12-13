@@ -14,7 +14,7 @@
     <string name="place_credit">Place credit</string>
 
     <string name="place_list_item">place_list_item</string>
-    <string name="place_images">place_images</string>
-    <string name="place_credits">place_credits</string>
+    <string name="current_lat">current_lat</string>
+    <string name="current_lng">current_lng</string>
     <string name="place_id">place_id</string>
 </resources>
