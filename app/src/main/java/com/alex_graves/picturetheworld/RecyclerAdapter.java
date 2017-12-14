@@ -1,7 +1,9 @@
 package com.alex_graves.picturetheworld;
 
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -130,34 +132,60 @@ class RecyclerAdapter extends RecyclerView.Adapter<RecyclerAdapter.ViewHolder> {
             delete.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
-                    // trim .jpg from the string
-                    String itemName = photo.getImageName();
-                    itemName = itemName.substring(0, itemName.length() - 4);
+                    confirmDelete(photo);
+                }
+            });
+        }
 
-                    RedisService.getService().deleteItem(itemName).enqueue(new Callback<RedisService.DelResponse>() {
-                        @Override
-                        public void onResponse(Call<RedisService.DelResponse> call, Response<RedisService.DelResponse> response) {
-                            // just continue
-                        }
+        private void confirmDelete(final UserImageItem photo) {
+            AlertDialog.Builder sure = new AlertDialog.Builder(image.getContext());
+            sure.setTitle(R.string.sure);
+            sure.setMessage(R.string.delete_user_photo);
 
-                        @Override
-                        public void onFailure(Call<RedisService.DelResponse> call, Throwable t) {
-                            Toast.makeText(image.getContext(), t.toString(), Toast.LENGTH_LONG).show();
-                        }
-                    });
+            sure.setPositiveButton(R.string.yes, new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialogInterface, int i) {
+                    deletePhoto(photo);
+                }
+            });
 
-                    RedisService.getService().deleteItem(photo.getItemName()).enqueue(new Callback<RedisService.DelResponse>() {
-                        @Override
-                        public void onResponse(Call<RedisService.DelResponse> call, Response<RedisService.DelResponse> response) {
-                            items.remove(photo);
-                            notifyDataSetChanged();
-                        }
+            sure.setNegativeButton(R.string.no, new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialogInterface, int i) {
+                    // dismisses automatically
+                }
+            });
 
-                        @Override
-                        public void onFailure(Call<RedisService.DelResponse> call, Throwable t) {
-                            Toast.makeText(image.getContext(), t.toString(), Toast.LENGTH_LONG).show();
-                        }
-                    });
+            sure.show();
+        }
+
+        private void deletePhoto(final UserImageItem photo) {
+            // trim .jpg from the string
+            String itemName = photo.getImageName();
+            itemName = itemName.substring(0, itemName.length() - 4);
+
+            RedisService.getService().deleteItem(itemName).enqueue(new Callback<RedisService.DelResponse>() {
+                @Override
+                public void onResponse(Call<RedisService.DelResponse> call, Response<RedisService.DelResponse> response) {
+                    // just continue
+                }
+
+                @Override
+                public void onFailure(Call<RedisService.DelResponse> call, Throwable t) {
+                    Toast.makeText(image.getContext(), t.toString(), Toast.LENGTH_LONG).show();
+                }
+            });
+
+            RedisService.getService().deleteItem(photo.getItemName()).enqueue(new Callback<RedisService.DelResponse>() {
+                @Override
+                public void onResponse(Call<RedisService.DelResponse> call, Response<RedisService.DelResponse> response) {
+                    items.remove(photo);
+                    notifyDataSetChanged();
+                }
+
+                @Override
+                public void onFailure(Call<RedisService.DelResponse> call, Throwable t) {
+                    Toast.makeText(image.getContext(), t.toString(), Toast.LENGTH_LONG).show();
                 }
             });
         }

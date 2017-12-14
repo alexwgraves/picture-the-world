@@ -30,4 +30,9 @@
     <string name="cancel">Cancel</string>
     <string name="user_no_photos">You haven\'t taken any photos yet!</string>
     <string name="delete">Delete</string>
+
+    <string name="sure">Are you sure?</string>
+    <string name="delete_user_photo">Do you want to permanently delete this photo?</string>
+    <string name="yes">Yes</string>
+    <string name="no">No</string>
 </resources>
