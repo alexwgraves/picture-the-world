@@ -91,8 +91,7 @@ public class CaptureActivity extends AppCompatActivity {
         cancel.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Intent main = new Intent(CaptureActivity.this, MainActivity.class);
-                startActivity(main);
+                finish();
             }
         });
 
@@ -208,7 +207,6 @@ public class CaptureActivity extends AppCompatActivity {
         File storageDir = getExternalFilesDir(Environment.DIRECTORY_PICTURES);
         File image = File.createTempFile(timeStamp, ".jpg", storageDir);
 
-        // Save a file: path for use with ACTION_VIEW intents
         photoPath = image.getAbsolutePath();
         currentImageName = timeStamp;
         return image;
@@ -227,8 +225,7 @@ public class CaptureActivity extends AppCompatActivity {
                         .enqueue(new Callback<RedisService.SetResponse>() {
                     @Override
                     public void onResponse(Call<RedisService.SetResponse> call, Response<RedisService.SetResponse> response) {
-                        Intent userPhotos = new Intent(CaptureActivity.this, UserPhotosActivity.class);
-                        startActivity(userPhotos);
+                        seePhotos();
                     }
 
                     @Override
