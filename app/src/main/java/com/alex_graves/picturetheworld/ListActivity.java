@@ -23,8 +23,8 @@ public class ListActivity extends AppCompatActivity {
     private ArrayList<ListItem> items = new ArrayList<>();
     private RecyclerAdapter adapter;
 
-    private double currentLat;
-    private double currentLng;
+    private double currentLat = 39.9583583;
+    private double currentLng = -75.1953933;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -35,13 +35,15 @@ public class ListActivity extends AppCompatActivity {
         // get lists if returning from other activities
         Intent intent = getIntent();
         ArrayList<ListItem> receivedItems = intent.getParcelableArrayListExtra(getString(R.string.place_list_item));
+        currentLat = intent.getDoubleExtra(getString(R.string.current_lat), currentLat);
+        currentLng = intent.getDoubleExtra(getString(R.string.current_lng), currentLng);
 
         if (receivedItems != null) {
             items = receivedItems;
         }
 
         // set up recycler
-        adapter = new RecyclerAdapter(items);
+        adapter = new RecyclerAdapter(items, this);
         RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(this);
         recyclerView.setLayoutManager(layoutManager);
         recyclerView.setAdapter(adapter);
@@ -70,6 +72,9 @@ public class ListActivity extends AppCompatActivity {
 
     void goToMain() {
         Intent home = new Intent(ListActivity.this, MainActivity.class);
+        home.putParcelableArrayListExtra(getString(R.string.place_list_item), items);
+        home.putExtra(getString(R.string.current_lat), currentLat);
+        home.putExtra(getString(R.string.current_lng), currentLng);
         startActivity(home);
     }
 
@@ -79,5 +84,17 @@ public class ListActivity extends AppCompatActivity {
         map.putExtra(getString(R.string.current_lat), currentLat);
         map.putExtra(getString(R.string.current_lng), currentLng);
         startActivity(map);
+    }
+
+    ArrayList<ListItem> getItems() {
+        return items;
+    }
+
+    double getCurrentLat() {
+        return currentLat;
+    }
+
+    double getCurrentLng() {
+        return currentLng;
     }
 }

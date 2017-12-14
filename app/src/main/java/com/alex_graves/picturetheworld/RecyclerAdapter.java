@@ -1,5 +1,6 @@
 package com.alex_graves.picturetheworld;
 
+import android.content.Context;
 import android.content.Intent;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
@@ -25,9 +26,16 @@ import butterknife.ButterKnife;
 
 class RecyclerAdapter extends RecyclerView.Adapter<RecyclerAdapter.ViewHolder> {
     private ArrayList<ListItem> items;
+    private Context listContext;
 
     RecyclerAdapter(ArrayList<ListItem> items) {
         this.items = items;
+        this.listContext = null;
+    }
+
+    RecyclerAdapter(ArrayList<ListItem> items, Context listContext) {
+        this.items = items;
+        this.listContext = listContext;
     }
 
     abstract class ViewHolder extends RecyclerView.ViewHolder {
@@ -57,6 +65,12 @@ class RecyclerAdapter extends RecyclerView.Adapter<RecyclerAdapter.ViewHolder> {
                         PlaceListItem place = (PlaceListItem) item;
                         Intent intent = new Intent(view.getContext(), PlaceActivity.class);
                         intent.putExtra(view.getContext().getString(R.string.place_id), place.getID());
+                        if (listContext != null) {
+                            ListActivity list = (ListActivity) listContext;
+                            intent.putParcelableArrayListExtra(list.getString(R.string.place_list_item), list.getItems());
+                            intent.putExtra(list.getString(R.string.current_lat), list.getCurrentLat());
+                            intent.putExtra(list.getString(R.string.current_lng), list.getCurrentLng());
+                        }
                         view.getContext().startActivity(intent);
                     }
                 }

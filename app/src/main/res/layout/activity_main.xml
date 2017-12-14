@@ -28,23 +28,33 @@
         android:orientation="vertical"
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:layout_weight="1"
+        android:layout_weight="2"
         android:gravity="center"
         android:background="@color/colorMap"
         android:padding="15dp">
 
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_margin="15dp"
+            android:textAlignment="center"
+            android:textSize="16sp"
+            android:text="@string/get_started"/>
+
         <Button
-            android:id="@+id/find_place"
+            android:id="@+id/connect"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:backgroundTint="@color/colorMapDark"
-            android:text="@string/find_location"/>
-    </LinearLayout>
+            android:text="@string/find_places"/>
 
-    <Button
-        android:id="@+id/connect"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Connect"/>
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_margin="15dp"
+            android:textAlignment="center"
+            android:textSize="16sp"
+            android:text="@string/next_steps"/>
+    </LinearLayout>
 
 </LinearLayout>

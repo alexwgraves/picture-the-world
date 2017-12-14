@@ -40,8 +40,8 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         // get lists if returning from other activities
         Intent intent = getIntent();
         ArrayList<ListItem> receivedItems = intent.getParcelableArrayListExtra(getString(R.string.place_list_item));
-        currentLat = intent.getDoubleExtra(getString(R.string.current_lat), 39.9583583);
-        currentLng = intent.getDoubleExtra(getString(R.string.current_lng), -75.1953933);
+        currentLat = intent.getDoubleExtra(getString(R.string.current_lat), currentLat);
+        currentLng = intent.getDoubleExtra(getString(R.string.current_lng), currentLng);
 
         if (receivedItems != null) {
             items = receivedItems;
@@ -71,6 +71,9 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
 
     void goToMain() {
         Intent home = new Intent(MapsActivity.this, MainActivity.class);
+        home.putParcelableArrayListExtra(getString(R.string.place_list_item), items);
+        home.putExtra(getString(R.string.current_lat), currentLat);
+        home.putExtra(getString(R.string.current_lng), currentLng);
         startActivity(home);
     }
 
@@ -90,6 +93,10 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         Log.d("current lat", Double.toString(currentLat));
         Log.d("current lng", Double.toString(currentLng));
         LatLng point = new LatLng(currentLat, currentLng);
+        if (currentLat == 0.0 || currentLng == 0.0 && items.size() > 0) {
+            PlaceListItem place = (PlaceListItem) items.get(0);
+            point = new LatLng(place.getLat(), place.getLng());
+        }
         mMap.addMarker(new MarkerOptions().position(point).title("You are here!")).showInfoWindow();
 
         for (ListItem item : items) {

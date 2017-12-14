@@ -6,8 +6,9 @@
     <string name="list_view">List</string>
     <string name="home">Home</string>
 
-    <string name="get_started">Get started</string>
-    <string name="find_location">Find my location</string>
+    <string name="get_started">Click the button below to get started!</string>
+    <string name="find_places">Find nearby places</string>
+    <string name="next_steps">Once you\'ve found nearby places, feel free to browse them using the list or map icons above.</string>
 
     <string name="place_name">Place name</string>
     <string name="place_description">Place description</string>

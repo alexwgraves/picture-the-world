@@ -75,8 +75,6 @@ public class MainActivity extends AppCompatActivity implements
 
     @BindView(R.id.connect)
     Button connect;
-    @BindView(R.id.find_place)
-    Button findPlace;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -125,22 +123,42 @@ public class MainActivity extends AppCompatActivity implements
             }
         };
 
-        // get user location
-        startLocationUpdates();
-
         connect.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 getNearbyPlacesInformation();
+                Toast.makeText(MainActivity.this,
+                        "Places found!",
+                        Toast.LENGTH_SHORT).show();
             }
         });
 
-        findPlace.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                getUserPlace();
-            }
-        });
+        // get user location
+        startLocationUpdates();
+
+        // get intent data if necessary
+        Intent intent = getIntent();
+        ArrayList<ListItem> receivedPlaces = intent.getParcelableArrayListExtra(getString(R.string.place_list_item));
+        double lat = intent.getDoubleExtra(getString(R.string.current_lat), currentLat);
+        double lng = intent.getDoubleExtra(getString(R.string.current_lng), currentLng);
+
+        // update member variables if necessary
+        if (receivedPlaces != null) {
+            items = receivedPlaces;
+        }
+
+        // if location changed or has never been checked, get user's place
+        if (placeIds.isEmpty() || lat != currentLat || lng != currentLng) {
+            getUserPlace();
+        }
+
+        // update location if necessary
+        if (lat != currentLat) {
+            currentLat = lat;
+        }
+        if (lng != currentLng) {
+            currentLng = lng;
+        }
 
         Log.d("lat", Double.toString(currentLat));
         Log.d("lng", Double.toString(currentLng));
@@ -253,6 +271,8 @@ public class MainActivity extends AppCompatActivity implements
     }
 
     void getNearbyPlacesInformation() {
+        // clear the list; if the user clicks this again, they want to refresh the place list
+        items = new ArrayList<>();
         for (String id : placeIds) {
             getPlaceInformation(id);
         }

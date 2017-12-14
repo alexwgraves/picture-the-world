@@ -33,7 +33,11 @@ public class PlaceActivity extends AppCompatActivity {
     RecyclerView recyclerView;
 
     private ArrayList<ListItem> items = new ArrayList<>();
+    private ArrayList<ListItem> placeItems = new ArrayList<>();
     RecyclerAdapter adapter;
+
+    private double currentLat = 39.9583583;
+    private double currentLng = -75.1953933;
 
     private GeoDataClient geoDataClient;
 
@@ -46,6 +50,13 @@ public class PlaceActivity extends AppCompatActivity {
         // get place id from previous activity
         Intent intent = getIntent();
         String id = intent.getStringExtra(getString(R.string.place_id));
+        ArrayList<ListItem> receivedPlaceItems = intent.getParcelableArrayListExtra(getString(R.string.place_list_item));
+        currentLat = intent.getDoubleExtra(getString(R.string.current_lat), currentLat);
+        currentLng = intent.getDoubleExtra(getString(R.string.current_lng), currentLng);
+
+        if (receivedPlaceItems != null) {
+            placeItems = receivedPlaceItems;
+        }
 
         // set up api
         geoDataClient = Places.getGeoDataClient(this, null);
@@ -81,6 +92,9 @@ public class PlaceActivity extends AppCompatActivity {
 
     void goToMain() {
         Intent home = new Intent(PlaceActivity.this, MainActivity.class);
+        home.putParcelableArrayListExtra(getString(R.string.place_list_item), placeItems);
+        home.putExtra(getString(R.string.current_lat), currentLat);
+        home.putExtra(getString(R.string.current_lng), currentLng);
         startActivity(home);
     }
 
