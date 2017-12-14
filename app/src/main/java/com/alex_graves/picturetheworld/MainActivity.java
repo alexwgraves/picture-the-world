@@ -3,7 +3,6 @@ package com.alex_graves.picturetheworld;
 import android.Manifest;
 import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.graphics.Bitmap;
 import android.location.Location;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
@@ -28,35 +27,22 @@ import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.location.places.GeoDataClient;
 import com.google.android.gms.location.places.Place;
 import com.google.android.gms.location.places.PlaceBuffer;
-import com.google.android.gms.location.places.PlaceBufferResponse;
 import com.google.android.gms.location.places.PlaceDetectionClient;
 import com.google.android.gms.location.places.PlaceLikelihood;
 import com.google.android.gms.location.places.PlaceLikelihoodBufferResponse;
-import com.google.android.gms.location.places.PlacePhotoMetadata;
-import com.google.android.gms.location.places.PlacePhotoMetadataBuffer;
-import com.google.android.gms.location.places.PlacePhotoMetadataResponse;
-import com.google.android.gms.location.places.PlacePhotoResponse;
 import com.google.android.gms.location.places.Places;
-import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
-import retrofit2.Call;
-import retrofit2.Callback;
-import retrofit2.Response;
 
 public class MainActivity extends AppCompatActivity implements
         GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener {
-    private final String INSTAGRAM_ACCESS_TOKEN = "3597152346.7d0b94c.49d17c5cd0fe4a65a9b34a1bdd1c151a";
-
     private static final int INTERNET_PERMISSION = 1;
     private static final int CAMERA_PERMISSION = 2;
     private static final int LOCATION_PERMISSION = 3;
@@ -159,9 +145,6 @@ public class MainActivity extends AppCompatActivity implements
         if (lng != currentLng) {
             currentLng = lng;
         }
-
-        Log.d("lat", Double.toString(currentLat));
-        Log.d("lng", Double.toString(currentLng));
     }
 
     @Override
@@ -276,92 +259,6 @@ public class MainActivity extends AppCompatActivity implements
         for (String id : placeIds) {
             getPlaceInformation(id);
         }
-    }
-
-    void getMedia() {
-        String id = "1515686174910420163_3597152346";
-        InstagramService.getService().getMedia(id,
-                INSTAGRAM_ACCESS_TOKEN).enqueue(new Callback<InstagramService.GetMediaResponse>() {
-            @Override
-            public void onResponse(Call<InstagramService.GetMediaResponse> call,
-                                   Response<InstagramService.GetMediaResponse> response) {
-                Log.d("response", call.request().url().toString());
-                MediaItem data = response.body().data;
-                Log.d("id", data.id);
-            }
-
-            @Override
-            public void onFailure(Call<InstagramService.GetMediaResponse> call, Throwable t) {
-                Log.d("error", t.toString());
-            }
-        });
-    }
-
-    void getNearbyMedia() {
-        Map<String, String> options = new HashMap<>();
-        options.put("lat", "39.9583583");
-        options.put("lng", "-75.1953933");
-        options.put("access_token", INSTAGRAM_ACCESS_TOKEN);
-        InstagramService.getService().getNearbyMedia(options).enqueue(new Callback<InstagramService.GetNearbyMediaResponse>() {
-            @Override
-            public void onResponse(Call<InstagramService.GetNearbyMediaResponse> call,
-                                   Response<InstagramService.GetNearbyMediaResponse> response) {
-                Log.d("response", call.request().url().toString());
-                ArrayList<MediaItem> data = response.body().data;
-                for (MediaItem d : data) {
-                    Log.d("id", d.id);
-                }
-            }
-
-            @Override
-            public void onFailure(Call<InstagramService.GetNearbyMediaResponse> call, Throwable t) {
-                Log.d("error", t.toString());
-            }
-        });
-    }
-
-    void getLocations() {
-        Map<String, String> options = new HashMap<>();
-        options.put("lat", "39.9583583");
-        options.put("lng", "-75.1953933");
-        options.put("access_token", INSTAGRAM_ACCESS_TOKEN);
-        InstagramService.getService().getLocations(options).enqueue(new Callback<InstagramService.GetLocationsResponse>() {
-            @Override
-            public void onResponse(Call<InstagramService.GetLocationsResponse> call,
-                                   Response<InstagramService.GetLocationsResponse> response) {
-                Log.d("response", call.request().url().toString());
-                ArrayList<LocationItem> data = response.body().data;
-                for (LocationItem d : data) {
-                    Log.d("name", d.name);
-                }
-            }
-
-            @Override
-            public void onFailure(Call<InstagramService.GetLocationsResponse> call, Throwable t) {
-                Log.d("error", t.toString());
-            }
-        });
-    }
-
-    void getLocationMedia() {
-        String id = "214228753";
-        InstagramService.getService().getLocationMedia(id,
-                INSTAGRAM_ACCESS_TOKEN).enqueue(new Callback<InstagramService.GetLocationMediaResponse>() {
-            @Override
-            public void onResponse(Call<InstagramService.GetLocationMediaResponse> call,
-                                   Response<InstagramService.GetLocationMediaResponse> response) {
-                Log.d("response", call.request().url().toString());
-                ArrayList<MediaItem> data = response.body().data;
-                for (MediaItem d : data) {
-                    Log.d("id", d.id);
-                }
-            }
-
-            @Override
-            public void onFailure(Call<InstagramService.GetLocationMediaResponse> call, Throwable t) {
-                Log.d("error", t.toString());
-            }
-        });
     }
 
     void getUserPlace() {
