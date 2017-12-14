@@ -13,4 +13,16 @@
         android:icon="@drawable/ic_places_list"
         app:showAsAction="ifRoom"
         android:title="@string/list_view"/>
+
+    <item
+        android:id="@+id/take_photo"
+        android:icon="@drawable/ic_take_photo"
+        app:showAsAction="ifRoom"
+        android:title="@string/take_photo"/>
+
+    <item
+        android:id="@+id/see_photos"
+        android:icon="@drawable/ic_see_photos"
+        app:showAsAction="ifRoom"
+        android:title="@string/user_photos_view"/>
 </menu>

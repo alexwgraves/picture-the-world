@@ -36,6 +36,12 @@
         <activity
             android:name=".PlaceActivity"
             android:label="@string/title_activity_place" />
+        <activity
+            android:name=".CaptureActivity"
+            android:label="@string/take_photo" />
+        <activity
+            android:name=".UserPhotosActivity"
+            android:label="@string/user_photos_view" />
 
         <meta-data
             android:name="com.google.android.geo.API_KEY"
@@ -53,9 +59,6 @@
                 android:name="android.support.FILE_PROVIDER_PATHS"
                 android:resource="@xml/file_paths" />
         </provider>
-
-        <activity android:name=".CaptureActivity" />
-        <activity android:name=".UserPhotosActivity"></activity>
     </application>
 
 </manifest>

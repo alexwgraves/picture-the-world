@@ -15,15 +15,13 @@ class PlaceListItem implements ListItem, Parcelable {
     private String id;
     private String name;
     private String description;
-    private String type;
     private double lat;
     private double lng;
 
-    PlaceListItem(String id, String name, String description, String type, LatLng coords) {
+    PlaceListItem(String id, String name, String description, LatLng coords) {
         this.id = id;
         this.name = name;
         this.description = description;
-        this.type = type;
         lat = coords.latitude;
         lng = coords.longitude;
     }
@@ -32,7 +30,6 @@ class PlaceListItem implements ListItem, Parcelable {
         id = in.readString();
         name = in.readString();
         description = in.readString();
-        type = in.readString();
         lat = in.readDouble();
         lng = in.readDouble();
     }
@@ -52,7 +49,6 @@ class PlaceListItem implements ListItem, Parcelable {
         dest.writeString(id);
         dest.writeString(name);
         dest.writeString(description);
-        dest.writeString(type);
         dest.writeDouble(lat);
         dest.writeDouble(lng);
     }
@@ -78,10 +74,6 @@ class PlaceListItem implements ListItem, Parcelable {
 
     String getDescription() {
         return description;
-    }
-
-    String getType() {
-        return type;
     }
 
     double getLat() {

@@ -24,7 +24,6 @@ import com.google.android.gms.location.LocationCallback;
 import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationResult;
 import com.google.android.gms.location.LocationServices;
-import com.google.android.gms.location.places.GeoDataClient;
 import com.google.android.gms.location.places.Place;
 import com.google.android.gms.location.places.PlaceBuffer;
 import com.google.android.gms.location.places.PlaceDetectionClient;
@@ -32,11 +31,9 @@ import com.google.android.gms.location.places.PlaceLikelihood;
 import com.google.android.gms.location.places.PlaceLikelihoodBufferResponse;
 import com.google.android.gms.location.places.Places;
 import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 
 import java.util.ArrayList;
-import java.util.List;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -51,7 +48,6 @@ public class MainActivity extends AppCompatActivity implements
     private static final int STORAGE_PERMISSION = 4;
 
     private GoogleApiClient googleApiClient;
-    private GeoDataClient geoDataClient;
     private PlaceDetectionClient placeClient;
     private FusedLocationProviderClient locationClient;
     private LocationRequest locationRequest;
@@ -104,7 +100,6 @@ public class MainActivity extends AppCompatActivity implements
                 .addApi(Places.PLACE_DETECTION_API)
                 .enableAutoManage(this, this)
                 .build();
-        geoDataClient = Places.getGeoDataClient(this, null);
         placeClient = Places.getPlaceDetectionClient(this, null);
         locationClient = LocationServices.getFusedLocationProviderClient(this);
         locationRequest = new LocationRequest();
@@ -281,6 +276,7 @@ public class MainActivity extends AppCompatActivity implements
 
     void takePhoto() {
         Intent capture = new Intent(MainActivity.this, CaptureActivity.class);
+        capture.putParcelableArrayListExtra(getString(R.string.place_list_item), items);
         capture.putExtra(getString(R.string.current_lat), currentLat);
         capture.putExtra(getString(R.string.current_lng), currentLng);
         startActivity(capture);
@@ -288,6 +284,9 @@ public class MainActivity extends AppCompatActivity implements
 
     void seePhotos() {
         Intent photos = new Intent(MainActivity.this, UserPhotosActivity.class);
+        photos.putParcelableArrayListExtra(getString(R.string.place_list_item), items);
+        photos.putExtra(getString(R.string.current_lat), currentLat);
+        photos.putExtra(getString(R.string.current_lng), currentLng);
         startActivity(photos);
     }
 
@@ -317,31 +316,9 @@ public class MainActivity extends AppCompatActivity implements
                         likelyPlaces.release();
                     } else {
                         Toast.makeText(MainActivity.this,
-                                "We can't find your current place. Try searching instead!",
+                                "We can't find your current place.",
                                 Toast.LENGTH_LONG).show();
                     }
-                }
-            });
-        } else {
-            ActivityCompat.requestPermissions(this,
-                    new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, LOCATION_PERMISSION);
-        }
-    }
-
-    void getUserLocation() {
-        int location = ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION);
-        if (location == PackageManager.PERMISSION_GRANTED) {
-            locationClient.getLastLocation().addOnSuccessListener(this, new OnSuccessListener<Location>() {
-                @Override
-                public void onSuccess(Location location) {
-                    if (location == null) {
-                        Toast.makeText(MainActivity.this,
-                                "We can't find your location. Try searching for places instead!",
-                                Toast.LENGTH_LONG).show();
-                        return;
-                    }
-                    Log.d("lat", Double.toString(location.getLatitude()));
-                    Log.d("lng", Double.toString(location.getLongitude()));
                 }
             });
         } else {
@@ -359,10 +336,8 @@ public class MainActivity extends AppCompatActivity implements
                 if (places.getStatus().isSuccess() && places.getCount() > 0) {
                     final Place place = places.get(0);
                     Log.i("place", "Place found: " + place.getName());
-                    // TODO parse place types
-                    List<Integer> types = place.getPlaceTypes();
                     PlaceListItem item = new PlaceListItem(placeId, place.getName().toString(),
-                            place.getAddress().toString(), "", place.getLatLng());
+                            place.getAddress().toString(), place.getLatLng());
                     items.add(item);
                 }
                 places.release();

@@ -7,9 +7,12 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.android.gms.location.places.Places;
+import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;
 
@@ -20,6 +23,8 @@ import retrofit2.Callback;
 import retrofit2.Response;
 
 public class UserPhotosActivity extends AppCompatActivity {
+    @BindView(R.id.no_photos)
+    TextView noPhotos;
     @BindView(R.id.recycler)
     RecyclerView recyclerView;
 
@@ -52,11 +57,25 @@ public class UserPhotosActivity extends AppCompatActivity {
         recyclerView.setLayoutManager(layoutManager);
         recyclerView.setAdapter(adapter);
         getItemKeys();
+
+        if (items.isEmpty()) {
+            noPhotos.setVisibility(View.VISIBLE);
+        }
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
     }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        getMenuInflater().inflate(R.menu._menu_place, menu);
+        getMenuInflater().inflate(R.menu._menu_see_photos, menu);
         return true;
     }
 
@@ -74,6 +93,11 @@ public class UserPhotosActivity extends AppCompatActivity {
 
         if (item.getItemId() == R.id.map_view) {
             goToMap();
+            return true;
+        }
+
+        if (item.getItemId() == R.id.take_photo) {
+            takePhoto();
             return true;
         }
 
@@ -104,6 +128,14 @@ public class UserPhotosActivity extends AppCompatActivity {
         startActivity(map);
     }
 
+    void takePhoto() {
+        Intent capture = new Intent(UserPhotosActivity.this, CaptureActivity.class);
+        capture.putParcelableArrayListExtra(getString(R.string.place_list_item), placeItems);
+        capture.putExtra(getString(R.string.current_lat), currentLat);
+        capture.putExtra(getString(R.string.current_lng), currentLng);
+        startActivity(capture);
+    }
+
     void getItemKeys() {
         RedisService.getService().allKeys("item_*").enqueue(new Callback<RedisService.KeysResponse>() {
             @Override
@@ -127,6 +159,7 @@ public class UserPhotosActivity extends AppCompatActivity {
                 if (response.body() != null) {
                     UserImageItem item = response.body().item;
                     items.add(item);
+                    noPhotos.setVisibility(View.GONE);
                     adapter.notifyDataSetChanged();
                 }
             }

@@ -1,26 +1,44 @@
 package com.alex_graves.picturetheworld;
 
+import android.Manifest;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Environment;
 import android.provider.MediaStore;
+import android.support.annotation.NonNull;
+import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.ContextCompat;
 import android.support.v4.content.FileProvider;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.Log;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.android.gms.location.places.PlaceDetectionClient;
+import com.google.android.gms.location.places.PlaceLikelihood;
+import com.google.android.gms.location.places.PlaceLikelihoodBufferResponse;
+import com.google.android.gms.location.places.Places;
+import com.google.android.gms.maps.model.Cap;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
 import com.squareup.picasso.Picasso;
 
 import java.io.File;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.Locale;
+import java.util.Map;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -32,11 +50,16 @@ import retrofit2.Response;
 
 public class CaptureActivity extends AppCompatActivity {
     static final int REQUEST_IMAGE_CAPTURE = 1;
+    static final int LOCATION_PERMISSION = 2;
     String photoPath;
     String currentImageName;
 
+    private PlaceDetectionClient placeClient;
+    private ArrayList<ListItem> placeItems = new ArrayList<>();
+
     private double currentLat = 39.9583583;
     private double currentLng = -75.1953933;
+    private String capturePlace = "";
 
     @BindView(R.id.cancel)
     Button cancel;
@@ -54,6 +77,19 @@ public class CaptureActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_capture);
         ButterKnife.bind(this);
+
+        // set up place API and get user's most likely place
+        placeClient = Places.getPlaceDetectionClient(this, null);
+        getUserPlace();
+
+        Intent intent = getIntent();
+        ArrayList<ListItem> receivedPlaceItems = intent.getParcelableArrayListExtra(getString(R.string.place_list_item));
+        currentLat = intent.getDoubleExtra(getString(R.string.current_lat), currentLat);
+        currentLng = intent.getDoubleExtra(getString(R.string.current_lng), currentLng);
+
+        if (receivedPlaceItems != null) {
+            placeItems = receivedPlaceItems;
+        }
 
         cancel.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -82,6 +118,69 @@ public class CaptureActivity extends AppCompatActivity {
                 }
             }
         });
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu._menu_take_photo, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        if (item.getItemId() == R.id.home_view) {
+            goToMain();
+            return true;
+        }
+
+        if (item.getItemId() == R.id.list_view) {
+            goToList();
+            return true;
+        }
+
+        if (item.getItemId() == R.id.map_view) {
+            goToMap();
+            return true;
+        }
+
+        if (item.getItemId() == R.id.see_photos) {
+            seePhotos();
+            return true;
+        }
+
+        return super.onOptionsItemSelected(item);
+    }
+
+    void goToMain() {
+        Intent home = new Intent(CaptureActivity.this, MainActivity.class);
+        home.putParcelableArrayListExtra(getString(R.string.place_list_item), placeItems);
+        home.putExtra(getString(R.string.current_lat), currentLat);
+        home.putExtra(getString(R.string.current_lng), currentLng);
+        startActivity(home);
+    }
+
+    void goToList() {
+        Intent list = new Intent(CaptureActivity.this, ListActivity.class);
+        list.putParcelableArrayListExtra(getString(R.string.place_list_item), placeItems);
+        list.putExtra(getString(R.string.current_lat), currentLat);
+        list.putExtra(getString(R.string.current_lng), currentLng);
+        startActivity(list);
+    }
+
+    void goToMap() {
+        Intent map = new Intent(CaptureActivity.this, MapsActivity.class);
+        map.putParcelableArrayListExtra(getString(R.string.place_list_item), placeItems);
+        map.putExtra(getString(R.string.current_lat), currentLat);
+        map.putExtra(getString(R.string.current_lng), currentLng);
+        startActivity(map);
+    }
+
+    void seePhotos() {
+        Intent photos = new Intent(CaptureActivity.this, UserPhotosActivity.class);
+        photos.putParcelableArrayListExtra(getString(R.string.place_list_item), placeItems);
+        photos.putExtra(getString(R.string.current_lat), currentLat);
+        photos.putExtra(getString(R.string.current_lng), currentLng);
+        startActivity(photos);
     }
 
     private void dispatchTakePictureIntent() {
@@ -127,7 +226,7 @@ public class CaptureActivity extends AppCompatActivity {
             public void onResponse(Call<RedisService.SetResponse> call, Response<RedisService.SetResponse> response) {
 
                 RedisService.getService().makeUserImageItem("item_" + imageName,
-                        new UserImageItem(imageName, credit.getText().toString(), new LatLng(currentLat, currentLng)))
+                        new UserImageItem(imageName, credit.getText().toString(), capturePlace))
                         .enqueue(new Callback<RedisService.SetResponse>() {
                     @Override
                     public void onResponse(Call<RedisService.SetResponse> call, Response<RedisService.SetResponse> response) {
@@ -153,6 +252,45 @@ public class CaptureActivity extends AppCompatActivity {
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         if (requestCode == REQUEST_IMAGE_CAPTURE && resultCode == RESULT_OK) {
             Picasso.with(this).load(new File(photoPath)).into(photo);
+        }
+    }
+
+    void getUserPlace() {
+        int location = ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION);
+        if (location == PackageManager.PERMISSION_GRANTED) {
+            Task<PlaceLikelihoodBufferResponse> placeResult = placeClient.getCurrentPlace(null);
+            placeResult.addOnCompleteListener(new OnCompleteListener<PlaceLikelihoodBufferResponse>() {
+                @Override
+                public void onComplete(@NonNull Task<PlaceLikelihoodBufferResponse> task) {
+                    if (task.isSuccessful() && task.getResult() != null) {
+                        Map<String, Float> likelihoods = new HashMap<>();
+                        PlaceLikelihoodBufferResponse likelyPlaces = task.getResult();
+                        for (PlaceLikelihood placeLikelihood : likelyPlaces) {
+                            likelihoods.put(placeLikelihood.getPlace().getName().toString(),
+                                    placeLikelihood.getLikelihood());
+                        }
+                        likelyPlaces.release();
+
+                        // find most likely place
+                        String mostLikely = "";
+                        float highest = 0.f;
+                        for (String name : likelihoods.keySet()) {
+                            if (likelihoods.get(name) > highest) {
+                                highest = likelihoods.get(name);
+                                mostLikely = name;
+                            }
+                        }
+                        capturePlace = mostLikely;
+                    } else {
+                        Toast.makeText(CaptureActivity.this,
+                                "We can't find your current place.",
+                                Toast.LENGTH_LONG).show();
+                    }
+                }
+            });
+        } else {
+            ActivityCompat.requestPermissions(this,
+                    new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, LOCATION_PERMISSION);
         }
     }
 }

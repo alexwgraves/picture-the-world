@@ -119,7 +119,7 @@ class RecyclerAdapter extends RecyclerView.Adapter<RecyclerAdapter.ViewHolder> {
             String url = MainActivity.URL + "GET/" + photo.getImageName();
             Picasso.with(image.getContext()).load(url).into(image);
             credit.setText(photo.getCredit());
-            location.setText(photo.getLocation().toString());
+            location.setText(photo.getPlace());
         }
     }
 

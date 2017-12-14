@@ -15,6 +15,7 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
 
 import java.util.ArrayList;
+import java.util.Map;
 
 public class MapsActivity extends AppCompatActivity implements OnMapReadyCallback {
     private GoogleMap mMap;
@@ -62,6 +63,16 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
             return true;
         }
 
+        if (item.getItemId() == R.id.take_photo) {
+            takePhoto();
+            return true;
+        }
+
+        if (item.getItemId() == R.id.see_photos) {
+            seePhotos();
+            return true;
+        }
+
         return super.onOptionsItemSelected(item);
     }
 
@@ -79,6 +90,22 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         list.putExtra(getString(R.string.current_lat), currentLat);
         list.putExtra(getString(R.string.current_lng), currentLng);
         startActivity(list);
+    }
+
+    void takePhoto() {
+        Intent capture = new Intent(MapsActivity.this, CaptureActivity.class);
+        capture.putParcelableArrayListExtra(getString(R.string.place_list_item), items);
+        capture.putExtra(getString(R.string.current_lat), currentLat);
+        capture.putExtra(getString(R.string.current_lng), currentLng);
+        startActivity(capture);
+    }
+
+    void seePhotos() {
+        Intent photos = new Intent(MapsActivity.this, UserPhotosActivity.class);
+        photos.putParcelableArrayListExtra(getString(R.string.place_list_item), items);
+        photos.putExtra(getString(R.string.current_lat), currentLat);
+        photos.putExtra(getString(R.string.current_lng), currentLng);
+        startActivity(photos);
     }
 
     @Override

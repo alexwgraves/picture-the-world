@@ -10,6 +10,9 @@ import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
+import android.widget.LinearLayout;
+import android.widget.TextView;
 
 import com.google.android.gms.location.places.GeoDataClient;
 import com.google.android.gms.location.places.PlacePhotoMetadata;
@@ -26,6 +29,8 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 
 public class PlaceActivity extends AppCompatActivity {
+    @BindView(R.id.no_photos)
+    TextView noPhotos;
     @BindView(R.id.recycler)
     RecyclerView recyclerView;
 
@@ -67,6 +72,10 @@ public class PlaceActivity extends AppCompatActivity {
         RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(this);
         recyclerView.setLayoutManager(layoutManager);
         recyclerView.setAdapter(adapter);
+
+        if (items.isEmpty()) {
+            noPhotos.setVisibility(View.VISIBLE);
+        }
     }
 
     @Override
@@ -92,6 +101,16 @@ public class PlaceActivity extends AppCompatActivity {
             return true;
         }
 
+        if (item.getItemId() == R.id.take_photo) {
+            takePhoto();
+            return true;
+        }
+
+        if (item.getItemId() == R.id.see_photos) {
+            seePhotos();
+            return true;
+        }
+
         return super.onOptionsItemSelected(item);
     }
 
@@ -114,6 +133,22 @@ public class PlaceActivity extends AppCompatActivity {
         map.putExtra(getString(R.string.current_lat), currentLat);
         map.putExtra(getString(R.string.current_lng), currentLng);
         startActivity(map);
+    }
+
+    void takePhoto() {
+        Intent capture = new Intent(PlaceActivity.this, CaptureActivity.class);
+        capture.putParcelableArrayListExtra(getString(R.string.place_list_item), placeItems);
+        capture.putExtra(getString(R.string.current_lat), currentLat);
+        capture.putExtra(getString(R.string.current_lng), currentLng);
+        startActivity(capture);
+    }
+
+    void seePhotos() {
+        Intent photos = new Intent(PlaceActivity.this, UserPhotosActivity.class);
+        photos.putParcelableArrayListExtra(getString(R.string.place_list_item), placeItems);
+        photos.putExtra(getString(R.string.current_lat), currentLat);
+        photos.putExtra(getString(R.string.current_lng), currentLng);
+        startActivity(photos);
     }
 
     private void getPhotos(String id) {
@@ -148,6 +183,7 @@ public class PlaceActivity extends AppCompatActivity {
                             PlacePhotoResponse photo = task.getResult();
                             Bitmap bitmap = photo.getBitmap();
                             ImageItem item = new ImageItem(placeId, bitmap, credit);
+                            noPhotos.setVisibility(View.GONE);
                             items.add(item);
                             adapter.notifyDataSetChanged();
                         }

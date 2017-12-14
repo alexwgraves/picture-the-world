@@ -64,6 +64,16 @@ public class ListActivity extends AppCompatActivity {
             return true;
         }
 
+        if (item.getItemId() == R.id.take_photo) {
+            takePhoto();
+            return true;
+        }
+
+        if (item.getItemId() == R.id.see_photos) {
+            seePhotos();
+            return true;
+        }
+
         return super.onOptionsItemSelected(item);
     }
 
@@ -81,6 +91,22 @@ public class ListActivity extends AppCompatActivity {
         map.putExtra(getString(R.string.current_lat), currentLat);
         map.putExtra(getString(R.string.current_lng), currentLng);
         startActivity(map);
+    }
+
+    void takePhoto() {
+        Intent capture = new Intent(ListActivity.this, CaptureActivity.class);
+        capture.putParcelableArrayListExtra(getString(R.string.place_list_item), items);
+        capture.putExtra(getString(R.string.current_lat), currentLat);
+        capture.putExtra(getString(R.string.current_lng), currentLng);
+        startActivity(capture);
+    }
+
+    void seePhotos() {
+        Intent photos = new Intent(ListActivity.this, UserPhotosActivity.class);
+        photos.putParcelableArrayListExtra(getString(R.string.place_list_item), items);
+        photos.putExtra(getString(R.string.current_lat), currentLat);
+        photos.putExtra(getString(R.string.current_lng), currentLng);
+        startActivity(photos);
     }
 
     ArrayList<ListItem> getItems() {

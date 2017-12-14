@@ -15,23 +15,20 @@ class UserImageItem implements ListItem {
     private String imageName;
     private String itemName;
     private String credit;
-    private double lat;
-    private double lng;
+    String place;
 
-    UserImageItem(String timestamp, String credit, LatLng location) {
+    UserImageItem(String timestamp, String credit, String place) {
         imageName = "img_" + timestamp + ".jpg";
         itemName = "item_" + timestamp;
         this.credit = credit;
-        lat = location.latitude;
-        lng = location.longitude;
+        this.place = place;
     }
 
     UserImageItem(Parcel in) {
         imageName = in.readString();
         itemName = in.readString();
         credit = in.readString();
-        lat = in.readDouble();
-        lng = in.readDouble();
+        place = in.readString();
     }
 
     @Override
@@ -49,8 +46,7 @@ class UserImageItem implements ListItem {
         dest.writeString(imageName);
         dest.writeString(itemName);
         dest.writeString(credit);
-        dest.writeDouble(lat);
-        dest.writeDouble(lng);
+        dest.writeString(place);
     }
 
     public static final Parcelable.Creator<UserImageItem> CREATOR = new Parcelable.Creator<UserImageItem>() {
@@ -72,11 +68,7 @@ class UserImageItem implements ListItem {
         return imageName;
     }
 
-    String getItemName() {
-        return itemName;
-    }
-
-    LatLng getLocation() {
-        return new LatLng(lat, lng);
+    String getPlace() {
+        return place;
     }
 }
