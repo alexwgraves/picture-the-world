@@ -9,6 +9,8 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.squareup.picasso.Picasso;
+
 import java.util.ArrayList;
 
 import butterknife.BindView;
@@ -61,6 +63,7 @@ class RecyclerAdapter extends RecyclerView.Adapter<RecyclerAdapter.ViewHolder> {
                         PlaceListItem place = (PlaceListItem) item;
                         Intent intent = new Intent(view.getContext(), PlaceActivity.class);
                         intent.putExtra(view.getContext().getString(R.string.place_id), place.getID());
+                        intent.putExtra(view.getContext().getString(R.string.place_item_name), place.getName());
                         if (listContext != null) {
                             ListActivity list = (ListActivity) listContext;
                             intent.putParcelableArrayListExtra(list.getString(R.string.place_list_item), list.getItems());
@@ -98,6 +101,28 @@ class RecyclerAdapter extends RecyclerView.Adapter<RecyclerAdapter.ViewHolder> {
         }
     }
 
+    class UserImageViewHolder extends ViewHolder {
+        @BindView(R.id.item_user_image)
+        ImageView image;
+        @BindView(R.id.item_user_credit)
+        TextView credit;
+        @BindView(R.id.item_user_location)
+        TextView location;
+
+        UserImageViewHolder(View v) {
+            super(v);
+            ButterKnife.bind(this, v);
+        }
+
+        public void bindType(ListItem item) {
+            UserImageItem photo = (UserImageItem) item;
+            String url = MainActivity.URL + "GET/" + photo.getImageName();
+            Picasso.with(image.getContext()).load(url).into(image);
+            credit.setText(photo.getCredit());
+            location.setText(photo.getLocation().toString());
+        }
+    }
+
     @Override
     public int getItemViewType(int position) {
         return items.get(position).getListItemType();
@@ -115,6 +140,10 @@ class RecyclerAdapter extends RecyclerView.Adapter<RecyclerAdapter.ViewHolder> {
                 view = LayoutInflater.from(parent.getContext())
                         .inflate(R.layout.image_list_item_layout, parent, false);
                 return new ImageViewHolder(view);
+            case ListItem.USER_IMAGE:
+                view = LayoutInflater.from(parent.getContext())
+                        .inflate(R.layout.user_image_list_item_layout, parent, false);
+                return new UserImageViewHolder(view);
         }
         return null;
     }

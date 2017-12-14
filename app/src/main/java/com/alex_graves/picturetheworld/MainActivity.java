@@ -43,9 +43,12 @@ import butterknife.ButterKnife;
 
 public class MainActivity extends AppCompatActivity implements
         GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener {
+    static final String URL = "http://ec2-54-210-25-34.compute-1.amazonaws.com/f12b6bcec98c1418b40722f7641f57e1/";
+
     private static final int INTERNET_PERMISSION = 1;
     private static final int CAMERA_PERMISSION = 2;
     private static final int LOCATION_PERMISSION = 3;
+    private static final int STORAGE_PERMISSION = 4;
 
     private GoogleApiClient googleApiClient;
     private GeoDataClient geoDataClient;
@@ -72,6 +75,7 @@ public class MainActivity extends AppCompatActivity implements
         int internet = ContextCompat.checkSelfPermission(this, Manifest.permission.INTERNET);
         int camera = ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA);
         int location = ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION);
+        int storage = ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE);
 
         if (internet != PackageManager.PERMISSION_GRANTED) {
             ActivityCompat.requestPermissions(this,
@@ -86,6 +90,11 @@ public class MainActivity extends AppCompatActivity implements
         if (location != PackageManager.PERMISSION_GRANTED) {
             ActivityCompat.requestPermissions(this,
                     new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, LOCATION_PERMISSION);
+        }
+
+        if (storage != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(this,
+                    new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, STORAGE_PERMISSION);
         }
 
         // set up places stuff
@@ -173,6 +182,13 @@ public class MainActivity extends AppCompatActivity implements
                             Toast.LENGTH_LONG).show();
                 }
             }
+            case STORAGE_PERMISSION: {
+                if (grantResults.length > 0 && grantResults[0] != PackageManager.PERMISSION_GRANTED) {
+                    Toast.makeText(MainActivity.this,
+                            "You should grant storage access to use Picture the World fully!",
+                            Toast.LENGTH_LONG).show();
+                }
+            }
         }
     }
 
@@ -191,6 +207,11 @@ public class MainActivity extends AppCompatActivity implements
 
         if (item.getItemId() == R.id.list_view) {
             goToList();
+            return true;
+        }
+
+        if (item.getItemId() == R.id.take_photo) {
+            takePhoto();
             return true;
         }
 
@@ -251,6 +272,13 @@ public class MainActivity extends AppCompatActivity implements
         list.putExtra(getString(R.string.current_lat), currentLat);
         list.putExtra(getString(R.string.current_lng), currentLng);
         startActivity(list);
+    }
+
+    void takePhoto() {
+        Intent capture = new Intent(MainActivity.this, CaptureActivity.class);
+        capture.putExtra(getString(R.string.current_lat), currentLat);
+        capture.putExtra(getString(R.string.current_lng), currentLng);
+        startActivity(capture);
     }
 
     void getNearbyPlacesInformation() {

@@ -52,10 +52,6 @@ class ImageItem implements ListItem, Parcelable {
         }
     };
 
-    String getID() {
-        return id;
-    }
-
     Bitmap getImage() {
         return image;
     }

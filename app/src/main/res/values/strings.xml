@@ -2,6 +2,7 @@
     <string name="app_name">Picture the World</string>
     <string name="app_description">Get recommendations of places to go and things to see from all around the world!</string>
     <string name="title_activity_maps">Nearby Places</string>
+    <string name="title_activity_place">Nearby Place</string>
     <string name="map_view">Map</string>
     <string name="list_view">List</string>
     <string name="home">Home</string>
@@ -13,9 +14,16 @@
     <string name="place_name">Place name</string>
     <string name="place_description">Place description</string>
     <string name="place_credit">Place credit</string>
+    <string name="place_location">Place location</string>
 
     <string name="place_list_item">place_list_item</string>
     <string name="current_lat">current_lat</string>
     <string name="current_lng">current_lng</string>
     <string name="place_id">place_id</string>
+    <string name="place_item_name">place_item_name</string>
+
+    <string name="user_credit">Credit yourself!</string>
+    <string name="take_photo">Take photo</string>
+    <string name="save">Save</string>
+    <string name="cancel">Cancel</string>
 </resources>

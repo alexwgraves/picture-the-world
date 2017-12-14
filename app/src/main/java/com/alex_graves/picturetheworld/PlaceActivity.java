@@ -44,9 +44,10 @@ public class PlaceActivity extends AppCompatActivity {
         setContentView(R.layout.activity_place);
         ButterKnife.bind(this);
 
-        // get place id from previous activity
+        // get place id and other info from previous activity
         Intent intent = getIntent();
         String id = intent.getStringExtra(getString(R.string.place_id));
+        String name = intent.getStringExtra(getString(R.string.place_item_name));
         ArrayList<ListItem> receivedPlaceItems = intent.getParcelableArrayListExtra(getString(R.string.place_list_item));
         currentLat = intent.getDoubleExtra(getString(R.string.current_lat), currentLat);
         currentLng = intent.getDoubleExtra(getString(R.string.current_lng), currentLng);
@@ -59,6 +60,8 @@ public class PlaceActivity extends AppCompatActivity {
         geoDataClient = Places.getGeoDataClient(this, null);
         getPhotos(id);
 
+        setTitle(name);
+
         // set up recycler
         adapter = new RecyclerAdapter(items);
         RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(this);
@@ -68,7 +71,7 @@ public class PlaceActivity extends AppCompatActivity {
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        getMenuInflater().inflate(R.menu._menu_map, menu);
+        getMenuInflater().inflate(R.menu._menu_place, menu);
         return true;
     }
 
@@ -81,6 +84,11 @@ public class PlaceActivity extends AppCompatActivity {
 
         if (item.getItemId() == R.id.list_view) {
             goToList();
+            return true;
+        }
+
+        if (item.getItemId() == R.id.map_view) {
+            goToMap();
             return true;
         }
 
@@ -98,6 +106,14 @@ public class PlaceActivity extends AppCompatActivity {
     void goToList() {
         // return to the list of places
         finish();
+    }
+
+    void goToMap() {
+        Intent map = new Intent(PlaceActivity.this, MapsActivity.class);
+        map.putParcelableArrayListExtra(getString(R.string.place_list_item), placeItems);
+        map.putExtra(getString(R.string.current_lat), currentLat);
+        map.putExtra(getString(R.string.current_lng), currentLng);
+        startActivity(map);
     }
 
     private void getPhotos(String id) {

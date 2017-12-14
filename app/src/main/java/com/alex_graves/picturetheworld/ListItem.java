@@ -11,6 +11,7 @@ import android.os.Parcelable;
 interface ListItem extends Parcelable {
     int PLACE = 1;
     int IMAGE = 2;
+    int USER_IMAGE = 3;
 
     int getListItemType();
 }
