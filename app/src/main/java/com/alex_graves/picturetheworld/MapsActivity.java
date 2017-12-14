@@ -15,7 +15,6 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
 
 import java.util.ArrayList;
-import java.util.Map;
 
 public class MapsActivity extends AppCompatActivity implements OnMapReadyCallback {
     private GoogleMap mMap;

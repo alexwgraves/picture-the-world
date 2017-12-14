@@ -29,4 +29,5 @@
     <string name="save">Save</string>
     <string name="cancel">Cancel</string>
     <string name="user_no_photos">You haven\'t taken any photos yet!</string>
+    <string name="delete">Delete</string>
 </resources>

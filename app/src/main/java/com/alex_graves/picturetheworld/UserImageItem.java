@@ -3,8 +3,6 @@ package com.alex_graves.picturetheworld;
 import android.os.Parcel;
 import android.os.Parcelable;
 
-import com.google.android.gms.maps.model.LatLng;
-
 /**
  * Created by agraves on 12/13/17.
  *
@@ -66,6 +64,10 @@ class UserImageItem implements ListItem {
 
     String getImageName() {
         return imageName;
+    }
+
+    String getItemName() {
+        return itemName;
     }
 
     String getPlace() {

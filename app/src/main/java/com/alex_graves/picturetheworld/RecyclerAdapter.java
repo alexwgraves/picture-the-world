@@ -6,8 +6,10 @@ import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.squareup.picasso.Picasso;
 
@@ -15,6 +17,9 @@ import java.util.ArrayList;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
 /**
  * Created by agraves on 12/11/17.
@@ -108,6 +113,8 @@ class RecyclerAdapter extends RecyclerView.Adapter<RecyclerAdapter.ViewHolder> {
         TextView credit;
         @BindView(R.id.item_user_location)
         TextView location;
+        @BindView(R.id.delete_item)
+        Button delete;
 
         UserImageViewHolder(View v) {
             super(v);
@@ -115,11 +122,44 @@ class RecyclerAdapter extends RecyclerView.Adapter<RecyclerAdapter.ViewHolder> {
         }
 
         public void bindType(ListItem item) {
-            UserImageItem photo = (UserImageItem) item;
+            final UserImageItem photo = (UserImageItem) item;
             String url = MainActivity.URL + "GET/" + photo.getImageName();
             Picasso.with(image.getContext()).load(url).into(image);
             credit.setText(photo.getCredit());
             location.setText(photo.getPlace());
+            delete.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    // trim .jpg from the string
+                    String itemName = photo.getImageName();
+                    itemName = itemName.substring(0, itemName.length() - 4);
+
+                    RedisService.getService().deleteItem(itemName).enqueue(new Callback<RedisService.DelResponse>() {
+                        @Override
+                        public void onResponse(Call<RedisService.DelResponse> call, Response<RedisService.DelResponse> response) {
+                            // just continue
+                        }
+
+                        @Override
+                        public void onFailure(Call<RedisService.DelResponse> call, Throwable t) {
+                            Toast.makeText(image.getContext(), t.toString(), Toast.LENGTH_LONG).show();
+                        }
+                    });
+
+                    RedisService.getService().deleteItem(photo.getItemName()).enqueue(new Callback<RedisService.DelResponse>() {
+                        @Override
+                        public void onResponse(Call<RedisService.DelResponse> call, Response<RedisService.DelResponse> response) {
+                            items.remove(photo);
+                            notifyDataSetChanged();
+                        }
+
+                        @Override
+                        public void onFailure(Call<RedisService.DelResponse> call, Throwable t) {
+                            Toast.makeText(image.getContext(), t.toString(), Toast.LENGTH_LONG).show();
+                        }
+                    });
+                }
+            });
         }
     }
 

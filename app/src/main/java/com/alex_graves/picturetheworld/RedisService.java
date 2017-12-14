@@ -42,7 +42,7 @@ class RedisService {
 
         // Delete the key and its value
         @GET("DEL/{key}")
-        Call<DelResponse> deletePost(@Path("key") String key);
+        Call<DelResponse> deleteItem(@Path("key") String key);
 
         // Store a value (in a Java class UserImageItem) under a key
         @PUT("SET/{key}")
