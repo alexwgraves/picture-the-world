@@ -131,8 +131,8 @@ public class CaptureActivity extends AppCompatActivity {
                         .enqueue(new Callback<RedisService.SetResponse>() {
                     @Override
                     public void onResponse(Call<RedisService.SetResponse> call, Response<RedisService.SetResponse> response) {
-                        Intent backToMain = new Intent(CaptureActivity.this, MainActivity.class);
-                        startActivity(backToMain);
+                        Intent userPhotos = new Intent(CaptureActivity.this, UserPhotosActivity.class);
+                        startActivity(userPhotos);
                     }
 
                     @Override

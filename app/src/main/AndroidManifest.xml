@@ -54,7 +54,8 @@
                 android:resource="@xml/file_paths" />
         </provider>
 
-        <activity android:name=".CaptureActivity"></activity>
+        <activity android:name=".CaptureActivity" />
+        <activity android:name=".UserPhotosActivity"></activity>
     </application>
 
 </manifest>

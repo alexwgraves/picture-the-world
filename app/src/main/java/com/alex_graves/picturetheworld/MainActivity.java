@@ -215,6 +215,11 @@ public class MainActivity extends AppCompatActivity implements
             return true;
         }
 
+        if (item.getItemId() == R.id.see_photos) {
+            seePhotos();
+            return true;
+        }
+
         return super.onOptionsItemSelected(item);
     }
 
@@ -279,6 +284,11 @@ public class MainActivity extends AppCompatActivity implements
         capture.putExtra(getString(R.string.current_lat), currentLat);
         capture.putExtra(getString(R.string.current_lng), currentLng);
         startActivity(capture);
+    }
+
+    void seePhotos() {
+        Intent photos = new Intent(MainActivity.this, UserPhotosActivity.class);
+        startActivity(photos);
     }
 
     void getNearbyPlacesInformation() {

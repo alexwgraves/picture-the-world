@@ -38,15 +38,15 @@ class RedisService {
 
         // Retrieve the value stored under a key
         @GET("GET/{key}")
-        Call<GetResponse> getPost(@Path("key") String key);
+        Call<GetResponse> getUserImageItem(@Path("key") String key);
 
         // Delete the key and its value
         @GET("DEL/{key}")
         Call<DelResponse> deletePost(@Path("key") String key);
 
-        // Store a value (in a Java class ListItem) under a key
+        // Store a value (in a Java class UserImageItem) under a key
         @PUT("SET/{key}")
-        Call<SetResponse> makeUserImageItem(@Path("key") String key, @Body ListItem body);
+        Call<SetResponse> makeUserImageItem(@Path("key") String key, @Body UserImageItem body);
 
         // Get all keys that match the given pattern
         @GET("KEYS/{pattern}*")
@@ -59,7 +59,7 @@ class RedisService {
 
     class GetResponse {
         @SerializedName("GET")
-        ListItem item; // ListItem is a Java class that holds data in your RecyclerView
+        UserImageItem item;
     }
 
     class KeysResponse {
